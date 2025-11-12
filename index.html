@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RENT4LESS | Affordable, Flexible Renting in Ghana</title>
+    <link rel="icon" type="image/jpeg" href="rent4less.jpeg" />
+    <link rel="apple-touch-icon" href="rent4less.jpeg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <nav class="navbar">
+          <a class="brand" href="#top">
+            <img class="brand-mark" src="rent4less.jpeg" alt="Rent4Less logo" />
+            <div>
+              <span class="brand-eyebrow">Rent4Less</span>
+              <h1>Homes that work for modern Ghana</h1>
+            </div>
+          </a>
+          <div class="nav-links">
+            <a href="#how-it-works">Model</a>
+            <a href="#listings">Homes</a>
+            <a href="#rent-calculator">Affordability</a>
+            <a href="#tenant-tools">Tenant tools</a>
+            <a href="#list-property" class="button button-primary"
+              >List property</a
+            >
+          </div>
+        </nav>
+
+        <section class="hero" id="top">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <p class="eyebrow">Purpose-built for salary earners &amp; verified landlords</p>
+              <h2>
+                Transparent rentals. Flexible payments. Guaranteed confidence.
+              </h2>
+              <p class="lead">
+                Rent4Less pairs vetted tenants with partners who guarantee on-time rent.
+                Choose monthly or quarterly plans, preview every home virtually, and
+                grow a reputation score that keeps you moving forward.
+              </p>
+              <div class="hero-actions">
+                <a href="#listings" class="button button-primary">Explore listings</a>
+                <a href="#list-property" class="button button-ghost"
+                  >Partner with us</a
+                >
+              </div>
+              <div class="hero-highlights">
+                <div>
+                  <span class="highlight-number">92%</span>
+                  <p>of tenants prefer flexible rent over furnished extras.</p>
+                </div>
+                <div>
+                  <span class="highlight-number">48 hrs</span>
+                  <p>average verification time for new landlord listings.</p>
+                </div>
+                <div>
+                  <span class="highlight-number">GHS 2.8k</span>
+                  <p>median monthly rent secured via payroll-backed plans.</p>
+                </div>
+              </div>
+            </div>
+            <div class="hero-media">
+              <div class="hero-card calculator-preview">
+                <header class="calculator-preview__header">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--amber"></span>
+                  <span class="dot dot--green"></span>
+                  <p>Instant Rent Calculator</p>
+                </header>
+                <div class="calculator-preview__body">
+                  <div class="calculator-preview__form">
+                    <label>
+                      Monthly income
+                      <div class="input-mock">
+                        <span class="input-prefix">GHS</span>
+                        <span class="input-value">7,500</span>
+                      </div>
+                    </label>
+                    <label>
+                      Household size
+                      <div class="input-mock input-mock--compact">
+                        <span class="input-value">3</span>
+                        <span class="input-caret">▾</span>
+                      </div>
+                    </label>
+                    <label>
+                      Preferred neighbourhood
+                      <div class="input-mock">
+                        <span class="input-placeholder">East Legon</span>
+                      </div>
+                    </label>
+                    <button class="button button-primary button-preview">Calculate affordability</button>
+                  </div>
+                  <aside class="calculator-preview__summary">
+                    <p class="summary-eyebrow">Estimated rent budget</p>
+                    <p class="summary-figure">GHS 2,625<span>/mo</span></p>
+                    <div class="summary-meter">
+                      <span class="summary-meter__bar summary-meter__bar--safe"></span>
+                      <span class="summary-meter__bar summary-meter__bar--stretch"></span>
+                      <span class="summary-meter__cursor" style="left: 66%"></span>
+                    </div>
+                    <ul class="summary-list">
+                      <li>Suggested plan: Monthly</li>
+                      <li>Stretch ceiling: GHS 3,375</li>
+                    </ul>
+                    <p class="summary-subhead">Matched homes</p>
+                    <div class="summary-listing">
+                      <span class="listing-pill">Accra</span>
+                      <div>
+                        <strong>2-Bed Apartment · Osu</strong>
+                        <p>GHS 2,400 &bull; Furnished &bull; Reputation ready</p>
+                      </div>
+                    </div>
+                    <div class="summary-listing">
+                      <span class="listing-pill">Tema</span>
+                      <div>
+                        <strong>Family Home · Comm. 10</strong>
+                        <p>GHS 2,650 &bull; Payroll backed &bull; 3 beds</p>
+                      </div>
+                    </div>
+                  </aside>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <section class="trusted-strip">
+      <div class="container">
+        <p>Trusted by forward-thinking employers, banks, and proptech partners across Accra.</p>
+        <ul>
+          <li>Payroll-backed rent payouts</li>
+          <li>Fraud-screened property onboarding</li>
+          <li>Tenant education &amp; dispute mediation</li>
+        </ul>
+      </div>
+    </section>
+
+    <main>
+      <section class="section" id="how-it-works">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Platform pillars</p>
+            <h3>Technology and partnerships that make rent equitable</h3>
+            <p>
+              Every touchpoint is designed around affordability, transparency, and
+              verified relationships between tenants, landlords, and employers.
+            </p>
+          </div>
+
+          <div class="feature-grid feature-grid--dense">
+            <article class="feature-card">
+              <h4>Flexible payment architecture</h4>
+              <p>
+                Salary-linked deductions, monthly or quarterly plans, and intelligent
+                reminders keep rent manageable for working professionals.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h4>Verified homes &amp; tours</h4>
+              <p>
+                Landlords pass document checks and digital inspections. Immersive 3D
+                tours help tenants qualify homes before committing.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h4>Tenant reputation score</h4>
+              <p>
+                Responsible tenancy boosts your score, unlocking premium homes,
+                lower deposits, and employer-backed incentives.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h4>Guaranteed payouts for landlords</h4>
+              <p>
+                Banking and employer integrations ensure rent lands on time—reducing
+                risk and eliminating the need for long upfront payments.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-neutral" id="list-property">
+        <div class="container layout-split">
+          <div class="split-copy">
+            <p class="eyebrow">For landlords</p>
+            <h3>List your property with confidence</h3>
+            <p>
+              Join a vetted network of landlords with tenants who value reliability.
+              Share the essentials below—our team reviews in under two days and brings
+              you interested renters immediately.
+            </p>
+            <ul class="staggered-list">
+              <li>Verified tenants with payroll backing and Rent4Less support</li>
+              <li>Transparent dashboards for payouts and tenant reviews</li>
+              <li>Dispute mediation and maintenance escalation paths</li>
+            </ul>
+          </div>
+          <div class="split-panel">
+            <form class="property-form surface-card" id="propertyForm">
+              <div class="form-grid">
+                <label>
+                  Property title*
+                  <input type="text" name="title" required />
+                </label>
+                <label>
+                  Location*
+                  <input type="text" name="location" required />
+                </label>
+                <label>
+                  Monthly rent (GHS)*
+                  <input type="number" name="price" min="0" required />
+                </label>
+                <label>
+                  Payment flexibility*
+                  <select name="paymentFlexibility" required>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly</option>
+                    <option value="Monthly or Quarterly">Monthly or Quarterly</option>
+                  </select>
+                </label>
+                <label>
+                  Bedrooms
+                  <input type="number" name="bedrooms" min="0" />
+                </label>
+                <label>
+                  Bathrooms
+                  <input type="number" name="bathrooms" min="0" />
+                </label>
+                <label>
+                  Floor area (m²)
+                  <input type="number" name="area" min="0" />
+                </label>
+                <label>
+                  Image URL
+                  <input type="url" name="image" placeholder="https://example.com/photo.jpg" />
+                </label>
+                <label>
+                  3D tour / video link
+                  <input type="url" name="tour" placeholder="https://example.com/tour" />
+                </label>
+              </div>
+              <label class="full-width">
+                Description*
+                <textarea
+                  name="description"
+                  rows="4"
+                  placeholder="Highlight amenities, neighbourhood, utilities, and house rules."
+                  required
+                ></textarea>
+              </label>
+              <button type="submit" class="button button-primary">Publish property</button>
+              <p class="form-footnote">
+                Rent4Less validates submissions for accuracy. Approved listings appear in
+                the marketplace and alerts go out to matching tenants.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="listings">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Featured inventory</p>
+            <h3>Curated homes ready for flexible rent plans</h3>
+            <p>
+              Apply filters to see rentals aligned with your income, household, and
+              payment preferences. Every listing includes transparency around pricing and
+              tenant expectations.
+            </p>
+          </div>
+
+          <div class="listing-controls surface-card">
+            <div class="control-group">
+              <label for="budgetFilter">Budget (GHS)</label>
+              <input type="number" id="budgetFilter" placeholder="e.g. 2500" min="0" />
+            </div>
+            <div class="control-group">
+              <label for="flexibilityFilter">Payment plan</label>
+              <select id="flexibilityFilter">
+                <option value="Any">Any</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Monthly or Quarterly">Monthly or Quarterly</option>
+              </select>
+            </div>
+            <div class="control-actions">
+              <button id="applyFilters" class="button button-primary subtle"
+                >Apply</button
+              >
+              <button id="resetFilters" class="button button-ghost subtle">Reset</button>
+            </div>
+          </div>
+
+          <div id="listingGrid" class="listing-grid"></div>
+        </div>
+      </section>
+
+      <section class="section section-neutral" id="saved-homes">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Shortlist</p>
+            <h3>Your saved homes</h3>
+            <p>
+              Keep track of apartments you love, share them with family or HR, and return
+              when you are ready to apply. Your shortlist stays in sync on this device.
+            </p>
+          </div>
+          <div id="savedGrid" class="listing-grid"></div>
+        </div>
+      </section>
+
+      <section class="section" id="rent-calculator">
+        <div class="container layout-split">
+          <div class="split-copy">
+            <p class="eyebrow">Affordability intelligence</p>
+            <h3>Know your rent ceiling before you search</h3>
+            <p>
+              Enter your income and household details. Our calculator mirrors the same
+              ratios employers and banks use to approve rent guarantees.
+            </p>
+            <ul class="staggered-list">
+              <li>Income-to-rent ratio anchored at 35% for sustainable budgets</li>
+              <li>Suggested payment plan recommendations</li>
+              <li>Instant shortlist of properties that fit your profile</li>
+            </ul>
+          </div>
+          <div class="split-panel">
+            <form class="calculator-form surface-card" id="calculatorForm">
+              <label>
+                Monthly take-home income (GHS)*
+                <input type="number" name="income" min="0" required />
+              </label>
+              <label>
+                Household size
+                <input type="number" name="household" min="1" value="1" />
+              </label>
+              <label>
+                Desired neighbourhood
+                <input type="text" name="neighborhood" placeholder="e.g. East Legon" />
+              </label>
+              <button type="submit" class="button button-primary">Calculate affordability</button>
+            </form>
+            <aside class="calculator-result surface-card" id="calculatorResult">
+              <h4>Estimated rent budget</h4>
+              <p>Enter your details to see Rent4Less recommendations.</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-neutral" id="tenant-tools">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Tenant success system</p>
+            <h3>Beyond listings: tools that nurture confident renters</h3>
+            <p>
+              From credit-building to guided tours, Rent4Less equips tenants with the
+              information needed to negotiate smarter and stay protected.
+            </p>
+          </div>
+          <div class="tools-grid">
+            <article class="tool-card surface-card">
+              <div>
+                <h4>Tenant reputation score</h4>
+                <p>
+                  Every on-time payment and landlord review strengthens your score,
+                  unlocking better rates and incentives.
+                </p>
+              </div>
+              <button class="link-inline" data-modal-target="reputationModal">
+                Learn how scoring works
+              </button>
+            </article>
+            <article class="tool-card surface-card">
+              <div>
+                <h4>3D Smart Tours</h4>
+                <p>
+                  Inspect the property remotely, compare layouts, and save physical
+                  viewings for homes that already fit your checklist.
+                </p>
+              </div>
+              <button class="link-inline" data-modal-target="tourModal">
+                Watch sample tour
+              </button>
+            </article>
+            <article class="tool-card surface-card">
+              <div>
+                <h4>Tenant Academy</h4>
+                <p>
+                  Micro lessons and live clinics demystify rental agreements, Ghanaian
+                  tenant rights, and budgeting best practices.
+                </p>
+              </div>
+              <a class="button button-ghost" href="#academy">Access resources</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="academy">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Continuous learning</p>
+            <h3>Tenant Academy spotlight</h3>
+            <p>
+              Built with housing experts, HR leaders, and renters who shaped the
+              Rent4Less concept through interviews and prototyping.
+            </p>
+          </div>
+          <div class="academy-grid">
+            <article class="academy-card surface-card">
+              <h4>Renting 101 in Ghana</h4>
+              <p>
+                Understand tenancy agreements, deposits, and dispute resolution in a
+                45-minute starter course.
+              </p>
+              <a href="#" class="link-inline">Enroll now</a>
+            </article>
+            <article class="academy-card surface-card">
+              <h4>Budget with intention</h4>
+              <p>
+                Interactive worksheet that aligns rent, commuting costs, and savings
+                goals across monthly or quarterly plans.
+              </p>
+              <a href="#" class="link-inline">Download worksheet</a>
+            </article>
+            <article class="academy-card surface-card">
+              <h4>Landlord collaboration clinic</h4>
+              <p>
+                Hear from landlords and employers about expectations, compliance, and
+                how Rent4Less mediates when needs shift.
+              </p>
+              <a href="#" class="link-inline">Book a seat</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-neutral" id="partners">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Partnership ecosystem</p>
+            <h3>Collaboration that scales affordable renting</h3>
+            <p>
+              Rent4Less thrives on trusted partners who value user protection as much as
+              growth. We welcome strategic conversations with:
+            </p>
+          </div>
+          <div class="partners-grid">
+            <div class="partner-card surface-card">
+              <p class="partner-label">Employers</p>
+              <p>Payroll integrations for automated rent deductions &amp; verification.</p>
+            </div>
+            <div class="partner-card surface-card">
+              <p class="partner-label">Banks &amp; fintechs</p>
+              <p>Escrow-backed rent payments and responsible credit-building.</p>
+            </div>
+            <div class="partner-card surface-card">
+              <p class="partner-label">PropTech providers</p>
+              <p>3D tours, IoT home checks, and fraud detection that bolsters trust.</p>
+            </div>
+            <div class="partner-card surface-card">
+              <p class="partner-label">Housing advocates</p>
+              <p>Shared data for fair pricing and inclusive housing policies.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img class="footer-logo" src="rent4less.jpeg" alt="Rent4Less logo" />
+          <div>
+            <span class="brand-eyebrow">Rent4Less</span>
+            <h4>Affordable housing with verified trust.</h4>
+            <p>
+              We help working-class Ghanaians secure flexible rent while giving landlords
+              the assurance of guaranteed payouts.
+            </p>
+          </div>
+        </div>
+        <div>
+          <h5>For tenants</h5>
+          <ul>
+            <li><a href="#listings">Browse homes</a></li>
+            <li><a href="#rent-calculator">Rent calculator</a></li>
+            <li><a href="#tenant-tools">Tenant tools</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>For landlords</h5>
+          <ul>
+            <li><a href="#list-property">List a property</a></li>
+            <li><a href="#partners">Partnerships</a></li>
+            <li><a href="#how-it-works">Verification model</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Stay informed</h5>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Work email" />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Rent4Less. All rights reserved.</p>
+    </footer>
+
+    <div class="modal" id="reputationModal">
+      <div class="modal-content">
+        <button class="modal-close" data-close>&times;</button>
+        <h4>How the Tenant Reputation Score works</h4>
+        <ul>
+          <li>Every payment you make through Rent4Less builds your score.</li>
+          <li>Landlords leave transparent reviews after each tenancy.</li>
+          <li>High scores unlock incentives like reduced deposits.</li>
+          <li>Employers can sponsor tenants with outstanding performance.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal" id="tourModal">
+      <div class="modal-content">
+        <button class="modal-close" data-close>&times;</button>
+        <h4>Sample 3D Smart Tour</h4>
+        <div class="tour-embed">
+          <iframe
+            src="https://my.matterport.com/show/?m=BM7s6FDX6zF"
+            title="Sample 3D Apartment Tour"
+            allow="xr-spatial-tracking; gyroscope; accelerometer"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="propertyModal">
+      <div class="modal-content property-modal">
+        <button class="modal-close" data-close>&times;</button>
+        <div id="propertyModalContent"></div>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
+
