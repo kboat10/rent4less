@@ -11,7 +11,17 @@ npx serve .
 
 Then open http://localhost:3000 in a browser.
 
-The site is fully static (`index.html`, `styles.css`, `script.js`) and supports client-side property submissions, listing filters, and an affordability calculator.
+The site is now split across multiple static pages:
+- `index.html` – landing page with instant calculator hero and platform highlights.
+- `model.html` – platform pillars and partnership ecosystem.
+- `listings.html` – property filters, verified listings, and saved homes.
+- `rent-calculator.html` – full affordability calculator experience.
+- `tenant-tools.html` – tenant reputation, smart tours, and academy resources.
+- `list-property.html` – landlord submission form with guaranteed payout messaging.
+
+All pages share the same CSS/JS bundle, so stateful features like saving homes and calculator results continue to work across navigation.
+
+The site is fully static (`*.html`, `styles.css`, `script.js`) and supports client-side property submissions, listing filters, and an affordability calculator.
 
 ## Deploy to Vercel
 

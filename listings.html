@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rent4Less | Available Homes</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <nav class="navbar">
+          <a class="brand" href="index.html">
+            <img class="brand-mark" src="rent4less.jpeg" alt="Rent4Less logo" />
+            <div>
+              <span class="brand-eyebrow">Rent4Less</span>
+              <h1>Homes that work for modern Ghana</h1>
+            </div>
+          </a>
+          <div class="nav-links">
+            <a href="model.html">Model</a>
+            <a href="listings.html" class="is-active">Homes</a>
+            <a href="rent-calculator.html">Affordability</a>
+            <a href="tenant-tools.html">Tenant tools</a>
+            <a href="list-property.html" class="button button-primary"
+              >List property</a
+            >
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <section class="page-hero">
+      <div class="container">
+        <h2>Browse verified Rent4Less homes</h2>
+        <p>
+          Filter homes by budget and payment flexibility, then save favourites to share
+          with family or HR before you apply.
+        </p>
+      </div>
+    </section>
+
+    <main>
+      <section class="section" id="listings">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Featured inventory</p>
+            <h3>Curated homes ready for flexible rent plans</h3>
+            <p>
+              Apply filters to see rentals aligned with your income, household, and
+              payment preferences. Every listing includes transparency around pricing and
+              tenant expectations.
+            </p>
+          </div>
+
+          <div class="listing-controls surface-card">
+            <div class="control-group">
+              <label for="budgetFilter">Budget (GHS)</label>
+              <input type="number" id="budgetFilter" placeholder="e.g. 2500" min="0" />
+            </div>
+            <div class="control-group">
+              <label for="flexibilityFilter">Payment plan</label>
+              <select id="flexibilityFilter">
+                <option value="Any">Any</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Monthly or Quarterly">Monthly or Quarterly</option>
+              </select>
+            </div>
+            <div class="control-actions">
+              <button id="applyFilters" class="button button-primary subtle">
+                Apply
+              </button>
+              <button id="resetFilters" class="button button-ghost subtle">Reset</button>
+            </div>
+          </div>
+
+          <div id="listingGrid" class="listing-grid"></div>
+        </div>
+      </section>
+
+      <section class="section section-neutral" id="saved-homes">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Shortlist</p>
+            <h3>Your saved homes</h3>
+            <p>
+              Keep track of apartments you love, share them with family or HR, and return
+              when you are ready to apply. Your shortlist stays in sync on this device.
+            </p>
+          </div>
+          <div id="savedGrid" class="listing-grid"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img class="footer-logo" src="rent4less.jpeg" alt="Rent4Less logo" />
+          <div>
+            <span class="brand-eyebrow">Rent4Less</span>
+            <h4>Affordable housing with verified trust.</h4>
+            <p>
+              We help working-class Ghanaians secure flexible rent while giving landlords
+              the assurance of guaranteed payouts.
+            </p>
+          </div>
+        </div>
+        <div>
+          <h5>For tenants</h5>
+          <ul>
+            <li><a href="listings.html">Browse homes</a></li>
+            <li><a href="rent-calculator.html">Rent calculator</a></li>
+            <li><a href="tenant-tools.html">Tenant tools</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>For landlords</h5>
+          <ul>
+            <li><a href="list-property.html">List a property</a></li>
+            <li><a href="model.html#partners">Partnerships</a></li>
+            <li><a href="model.html#how-it-works">Verification model</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Stay informed</h5>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Work email" />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Rent4Less. All rights reserved.</p>
+    </footer>
+
+    <div class="modal" id="propertyModal">
+      <div class="modal-content property-modal">
+        <button class="modal-close" data-close>&times;</button>
+        <div id="propertyModalContent"></div>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
+

@@ -7,6 +7,8 @@ const applyFiltersButton = document.getElementById("applyFilters");
 const resetFiltersButton = document.getElementById("resetFilters");
 const calculatorForm = document.getElementById("calculatorForm");
 const calculatorResult = document.getElementById("calculatorResult");
+const heroCalculatorForm = document.getElementById("heroCalculatorForm");
+const heroCalculatorResult = document.getElementById("heroCalculatorResult");
 const yearSpan = document.getElementById("year");
 const propertyModal = document.getElementById("propertyModal");
 const propertyModalContent = document.getElementById("propertyModalContent");
@@ -226,6 +228,7 @@ function createPropertyCard(property, options = {}) {
 }
 
 function renderProperties(list = properties, target = listingGrid, options = {}) {
+  if (!target) return;
   target.innerHTML = "";
   if (!list.length) {
     const emptyState = document.createElement("p");
@@ -240,6 +243,7 @@ function renderProperties(list = properties, target = listingGrid, options = {})
 }
 
 function renderSavedProperties() {
+  if (!savedGrid) return;
   const savedList = savedPropertyIds
     .map((id) => properties.find((property) => property.id === id))
     .filter(Boolean);
@@ -294,13 +298,12 @@ function handlePropertySubmit(event) {
 }
 
 function getFilteredProperties() {
-  const budgetValue = Number(budgetFilter.value);
-  const flexibilityValue = flexibilityFilter.value;
+  if (!listingGrid) return [];
+  const budgetValue = Number(budgetFilter?.value);
+  const flexibilityValue = flexibilityFilter?.value || "Any";
 
   return properties.filter((property) => {
-    const matchesBudget = budgetValue
-      ? property.price <= budgetValue
-      : true;
+    const matchesBudget = budgetValue ? property.price <= budgetValue : true;
     const matchesFlexibility =
       flexibilityValue === "Any" ||
       property.paymentFlexibility === flexibilityValue;
@@ -309,70 +312,174 @@ function getFilteredProperties() {
 }
 
 function renderWithActiveFilters() {
+  if (!listingGrid) return;
   const filtered = getFilteredProperties();
   renderProperties(filtered);
 }
 
 function applyFilters() {
+  if (!listingGrid) return;
   renderWithActiveFilters();
 }
 
 function resetFilters() {
-  budgetFilter.value = "";
-  flexibilityFilter.value = "Any";
+  if (!listingGrid) return;
+  if (budgetFilter) budgetFilter.value = "";
+  if (flexibilityFilter) flexibilityFilter.value = "Any";
   renderWithActiveFilters();
 }
 
-function handleCalculatorSubmit(event) {
-  event.preventDefault();
-  const formData = new FormData(calculatorForm);
-  const income = Number(formData.get("income"));
-  const household = Number(formData.get("household")) || 1;
-  const neighborhood = formData.get("neighborhood")?.trim();
+function calculateAffordability({ income, household = 1, neighborhood = "" }) {
+  if (!income || income <= 0) {
+    return null;
+  }
 
-  if (!income) return;
+  const sanitizedHousehold = household > 0 ? household : 1;
+  const recommendedRatio = 0.35;
+  const stretchRatio = 0.45;
 
-  const recommendedRent = Math.round((income * 0.35) / 50) * 50;
-  const stretchRent = Math.round((income * 0.45) / 50) * 50;
+  const recommendedRent = Math.round((income * recommendedRatio) / 50) * 50;
+  const stretchRent = Math.round((income * stretchRatio) / 50) * 50;
   const suggestedPlan = income < 4000 ? "Monthly" : "Monthly or Quarterly";
+  const affordabilityPercent = ((recommendedRent / income) * 100).toFixed(1);
+
+  const safeWidth = stretchRent
+    ? Math.min(Math.max((recommendedRent / stretchRent) * 100, 8), 100).toFixed(1)
+    : 0;
+  const cursorPercent = stretchRent
+    ? Math.min(Math.max((recommendedRent / stretchRent) * 100, 6), 96).toFixed(1)
+    : 0;
 
   const matchingProperties = properties
     .filter((property) => property.price <= stretchRent)
     .slice(0, 3);
 
-  const propertyListItems = matchingProperties
-    .map(
-      (property) =>
-        `<li><strong>${property.title}</strong> &mdash; ${formatCurrency(
-          property.price
-        )} in ${property.location}</li>`
-    )
+  return {
+    income,
+    household: sanitizedHousehold,
+    neighborhood,
+    recommendedRent,
+    stretchRent,
+    suggestedPlan,
+    affordabilityPercent,
+    safeWidth,
+    cursorPercent,
+    matchingProperties,
+  };
+}
+
+function renderCalculatorSummary(target, data, options = {}) {
+  if (!target) return;
+
+  const placeholderMessage =
+    options.placeholderMessage ||
+    "Enter your income to discover a realistic monthly rent and matched homes.";
+
+  if (!data) {
+    target.innerHTML = `
+      <div class="calc-placeholder">
+        <p class="summary-eyebrow">Estimated rent budget</p>
+        <p class="calc-empty-copy">${placeholderMessage}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const matchesMarkup = data.matchingProperties
+    .map((property) => {
+      const town = property.location.split(",")[0];
+      return `
+        <div class="summary-listing">
+          <span class="listing-pill">${town}</span>
+          <div>
+            <strong>${property.title}</strong>
+            <p>${formatCurrency(property.price)} &bull; ${property.paymentFlexibility}</p>
+          </div>
+        </div>
+      `;
+    })
     .join("");
 
-  calculatorResult.innerHTML = `
-    <h4>Estimated rent budget</h4>
-    <p>Your ideal rent spend is around <strong>${formatCurrency(
-      recommendedRent
-    )}</strong> per month.</p>
-    <div class="estimate-highlight">
-      <span>Stretch limit:</span>
-      <span>${formatCurrency(stretchRent)}</span>
+  target.innerHTML = `
+    <div class="calculator-preview__summary calc-live-summary">
+      <p class="summary-eyebrow">Estimated rent budget</p>
+      <p class="summary-figure">${formatCurrency(data.recommendedRent)}<span>/mo</span></p>
+      <p class="calc-subtext">≈ ${data.affordabilityPercent}% of take-home pay</p>
+      <div class="summary-meter">
+        <span class="summary-meter__bar summary-meter__bar--stretch" style="width:100%"></span>
+        <span class="summary-meter__bar summary-meter__bar--safe" style="width:${data.safeWidth}%"></span>
+        <span class="summary-meter__cursor" style="left:${data.cursorPercent}%"></span>
+      </div>
+      <ul class="calc-stats">
+        <li><span>Suggested plan</span><strong>${data.suggestedPlan}</strong></li>
+        <li><span>Stretch ceiling</span><strong>${formatCurrency(data.stretchRent)}</strong></li>
+        <li><span>Household size</span><strong>${data.household}</strong></li>
+      </ul>
+      <p class="summary-subhead">Matched homes</p>
+      ${
+        data.matchingProperties.length
+          ? `<div class="calc-matches">${matchesMarkup}</div>`
+          : `<p class="summary-empty">No homes match yet — share your preferences so we can alert you the moment new listings go live.</p>`
+      }
+      ${
+        data.neighborhood
+          ? `<p class="calc-subtext">Tip: we’ll prioritise homes around <strong>${data.neighborhood}</strong> when new listings arrive.</p>`
+          : ""
+      }
     </div>
-    <p>Suggested payment plan: <strong>${suggestedPlan}</strong></p>
-    ${
-      neighborhood
-        ? `<p>Tip: We found ${matchingProperties.length} homes near <strong>${neighborhood}</strong> that may fit your budget.</p>`
-        : `<p>We found ${matchingProperties.length} homes that fit your affordability range.</p>`
-    }
-    ${
-      matchingProperties.length
-        ? `<ul>${propertyListItems}</ul>`
-        : `<p>List your rent preferences so we can alert you when new homes go live.</p>`
-    }
-    <p class="calculator-footnote">
-      Calculation assumes ${35}% of your take-home pay is reserved for rent and housing costs, adjusted for ${household} household member(s).
-    </p>
   `;
+}
+
+function setupCalculatorForm(formElement, resultContainer, options = {}) {
+  if (!formElement || !resultContainer) return;
+
+  const { defaults, onResult, placeholderMessage, syncOnInit = true } = options;
+
+  if (defaults) {
+    if (defaults.income != null && formElement.elements["income"]) {
+      formElement.elements["income"].value = defaults.income;
+    }
+    if (defaults.household != null && formElement.elements["household"]) {
+      formElement.elements["household"].value = defaults.household;
+    }
+    if (defaults.neighborhood != null && formElement.elements["neighborhood"]) {
+      formElement.elements["neighborhood"].value = defaults.neighborhood;
+    }
+  }
+
+  const initialData = defaults
+    ? calculateAffordability({
+        income: Number(defaults.income),
+        household: Number(defaults.household) || 1,
+        neighborhood: defaults.neighborhood?.trim() || "",
+      })
+    : null;
+
+  if (initialData) {
+    renderCalculatorSummary(resultContainer, initialData, { placeholderMessage });
+    if (syncOnInit) {
+      onResult?.(initialData);
+    }
+  } else {
+    renderCalculatorSummary(resultContainer, null, { placeholderMessage });
+  }
+
+  formElement.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(formElement);
+    const income = Number(formData.get("income"));
+    const household = Number(formData.get("household")) || 1;
+    const neighborhood = formData.get("neighborhood")?.trim();
+
+    const data = calculateAffordability({ income, household, neighborhood });
+    if (!data) {
+      renderCalculatorSummary(resultContainer, null, { placeholderMessage });
+      return;
+    }
+
+    renderCalculatorSummary(resultContainer, data, { placeholderMessage });
+    onResult?.(data);
+  });
 }
 
 function setupModals() {
@@ -502,12 +609,40 @@ function init() {
   if (yearSpan) {
     yearSpan.textContent = new Date().getFullYear();
   }
+
+  const calculatorPlaceholder =
+    "Enter your income to discover a realistic monthly rent and matched homes.";
+
+  setupCalculatorForm(calculatorForm, calculatorResult, {
+    placeholderMessage: calculatorPlaceholder,
+  });
+
+  setupCalculatorForm(heroCalculatorForm, heroCalculatorResult, {
+    defaults: { income: 7500, household: 3, neighborhood: "East Legon" },
+    placeholderMessage: calculatorPlaceholder,
+    syncOnInit: false,
+    onResult: (data) => {
+      renderCalculatorSummary(calculatorResult, data, {
+        placeholderMessage: calculatorPlaceholder,
+      });
+      if (calculatorForm) {
+        if (calculatorForm.elements["income"]) {
+          calculatorForm.elements["income"].value = data.income;
+        }
+        if (calculatorForm.elements["household"]) {
+          calculatorForm.elements["household"].value = data.household;
+        }
+        if (calculatorForm.elements["neighborhood"]) {
+          calculatorForm.elements["neighborhood"].value = data.neighborhood || "";
+        }
+      }
+    },
+  });
 }
 
 propertyForm?.addEventListener("submit", handlePropertySubmit);
 applyFiltersButton?.addEventListener("click", applyFilters);
 resetFiltersButton?.addEventListener("click", resetFilters);
-calculatorForm?.addEventListener("submit", handleCalculatorSubmit);
 
 document.addEventListener("DOMContentLoaded", init);
 

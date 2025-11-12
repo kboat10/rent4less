@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rent4Less | Tenant Tools & Academy</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <nav class="navbar">
+          <a class="brand" href="index.html">
+            <img class="brand-mark" src="rent4less.jpeg" alt="Rent4Less logo" />
+            <div>
+              <span class="brand-eyebrow">Rent4Less</span>
+              <h1>Homes that work for modern Ghana</h1>
+            </div>
+          </a>
+          <div class="nav-links">
+            <a href="model.html">Model</a>
+            <a href="listings.html">Homes</a>
+            <a href="rent-calculator.html">Affordability</a>
+            <a href="tenant-tools.html" class="is-active">Tenant tools</a>
+            <a href="list-property.html" class="button button-primary"
+              >List property</a
+            >
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <section class="page-hero">
+      <div class="container">
+        <h2>Empower tenants with data and education</h2>
+        <p>
+          Build a strong rental profile, tour homes virtually, and access bite-sized
+          lessons that make tenancy agreements easier to navigate.
+        </p>
+      </div>
+    </section>
+
+    <main>
+      <section class="section section-neutral" id="tenant-tools">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Tenant success system</p>
+            <h3>Beyond listings: tools that nurture confident renters</h3>
+            <p>
+              From credit-building to guided tours, Rent4Less equips tenants with the
+              information needed to negotiate smarter and stay protected.
+            </p>
+          </div>
+          <div class="tools-grid">
+            <article class="tool-card surface-card">
+              <div>
+                <h4>Tenant reputation score</h4>
+                <p>
+                  Every on-time payment and landlord review strengthens your score,
+                  unlocking better rates and incentives.
+                </p>
+              </div>
+              <button class="link-inline" data-modal-target="reputationModal">
+                Learn how scoring works
+              </button>
+            </article>
+            <article class="tool-card surface-card">
+              <div>
+                <h4>3D Smart Tours</h4>
+                <p>
+                  Inspect the property remotely, compare layouts, and save physical
+                  viewings for homes that already fit your checklist.
+                </p>
+              </div>
+              <button class="link-inline" data-modal-target="tourModal">
+                Watch sample tour
+              </button>
+            </article>
+            <article class="tool-card surface-card">
+              <div>
+                <h4>Tenant Academy</h4>
+                <p>
+                  Micro lessons and live clinics demystify rental agreements, Ghanaian
+                  tenant rights, and budgeting best practices.
+                </p>
+              </div>
+              <a class="button button-ghost" href="#academy">Access resources</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="academy">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Continuous learning</p>
+            <h3>Tenant Academy spotlight</h3>
+            <p>
+              Built with housing experts, HR leaders, and renters who shaped the
+              Rent4Less concept through interviews and prototyping.
+            </p>
+          </div>
+          <div class="academy-grid">
+            <article class="academy-card surface-card">
+              <h4>Renting 101 in Ghana</h4>
+              <p>
+                Understand tenancy agreements, deposits, and dispute resolution in a
+                45-minute starter course.
+              </p>
+              <a href="#" class="link-inline">Enroll now</a>
+            </article>
+            <article class="academy-card surface-card">
+              <h4>Budget with intention</h4>
+              <p>
+                Interactive worksheet that aligns rent, commuting costs, and savings
+                goals across monthly or quarterly plans.
+              </p>
+              <a href="#" class="link-inline">Download worksheet</a>
+            </article>
+            <article class="academy-card surface-card">
+              <h4>Landlord collaboration clinic</h4>
+              <p>
+                Hear from landlords and employers about expectations, compliance, and
+                how Rent4Less mediates when needs shift.
+              </p>
+              <a href="#" class="link-inline">Book a seat</a>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img class="footer-logo" src="rent4less.jpeg" alt="Rent4Less logo" />
+          <div>
+            <span class="brand-eyebrow">Rent4Less</span>
+            <h4>Affordable housing with verified trust.</h4>
+            <p>
+              We help working-class Ghanaians secure flexible rent while giving landlords
+              the assurance of guaranteed payouts.
+            </p>
+          </div>
+        </div>
+        <div>
+          <h5>For tenants</h5>
+          <ul>
+            <li><a href="listings.html">Browse homes</a></li>
+            <li><a href="rent-calculator.html">Rent calculator</a></li>
+            <li><a href="tenant-tools.html">Tenant tools</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>For landlords</h5>
+          <ul>
+            <li><a href="list-property.html">List a property</a></li>
+            <li><a href="model.html#partners">Partnerships</a></li>
+            <li><a href="model.html#how-it-works">Verification model</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Stay informed</h5>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Work email" />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Rent4Less. All rights reserved.</p>
+    </footer>
+
+    <div class="modal" id="reputationModal">
+      <div class="modal-content">
+        <button class="modal-close" data-close>&times;</button>
+        <h4>How the Tenant Reputation Score works</h4>
+        <ul>
+          <li>Every payment you make through Rent4Less builds your score.</li>
+          <li>Landlords leave transparent reviews after each tenancy.</li>
+          <li>High scores unlock incentives like reduced deposits.</li>
+          <li>Employers can sponsor tenants with outstanding performance.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal" id="tourModal">
+      <div class="modal-content">
+        <button class="modal-close" data-close>&times;</button>
+        <h4>Sample 3D Smart Tour</h4>
+        <div class="tour-embed">
+          <iframe
+            src="https://my.matterport.com/show/?m=BM7s6FDX6zF"
+            title="Sample 3D Apartment Tour"
+            allow="xr-spatial-tracking; gyroscope; accelerometer"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
+

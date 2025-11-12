@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rent4Less | List Your Property</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <nav class="navbar">
+          <a class="brand" href="index.html">
+            <img class="brand-mark" src="rent4less.jpeg" alt="Rent4Less logo" />
+            <div>
+              <span class="brand-eyebrow">Rent4Less</span>
+              <h1>Homes that work for modern Ghana</h1>
+            </div>
+          </a>
+          <div class="nav-links">
+            <a href="model.html">Model</a>
+            <a href="listings.html">Homes</a>
+            <a href="rent-calculator.html">Affordability</a>
+            <a href="tenant-tools.html">Tenant tools</a>
+            <a href="list-property.html" class="button button-primary is-active"
+              >List property</a
+            >
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <section class="page-hero">
+      <div class="container">
+        <h2>List your property with confidence</h2>
+        <p>
+          Join a vetted network of landlords with tenants who value reliability.
+          Our team reviews submissions within 48 hours and connects you with
+          payroll-backed renters ready to move in.
+        </p>
+      </div>
+    </section>
+
+    <main>
+      <section class="section section-neutral" id="list-property">
+        <div class="container layout-split">
+          <div class="split-copy">
+            <p class="eyebrow">For landlords</p>
+            <h3>Guaranteed payouts and verified tenants</h3>
+            <p>
+              Share the essentials below—Rent4Less validates listings for accuracy and
+              keeps your property in front of responsible salary earners.
+            </p>
+            <ul class="staggered-list">
+              <li>Verified tenants with payroll backing and Rent4Less support</li>
+              <li>Transparent dashboards for payouts and tenant reviews</li>
+              <li>Dispute mediation and maintenance escalation paths</li>
+            </ul>
+          </div>
+          <div class="split-panel">
+            <form class="property-form surface-card" id="propertyForm">
+              <div class="form-grid">
+                <label>
+                  Property title*
+                  <input type="text" name="title" required />
+                </label>
+                <label>
+                  Location*
+                  <input type="text" name="location" required />
+                </label>
+                <label>
+                  Monthly rent (GHS)*
+                  <input type="number" name="price" min="0" required />
+                </label>
+                <label>
+                  Payment flexibility*
+                  <select name="paymentFlexibility" required>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly</option>
+                    <option value="Monthly or Quarterly">Monthly or Quarterly</option>
+                  </select>
+                </label>
+                <label>
+                  Bedrooms
+                  <input type="number" name="bedrooms" min="0" />
+                </label>
+                <label>
+                  Bathrooms
+                  <input type="number" name="bathrooms" min="0" />
+                </label>
+                <label>
+                  Floor area (m²)
+                  <input type="number" name="area" min="0" />
+                </label>
+                <label>
+                  Image URL
+                  <input type="url" name="image" placeholder="https://example.com/photo.jpg" />
+                </label>
+                <label>
+                  3D tour / video link
+                  <input type="url" name="tour" placeholder="https://example.com/tour" />
+                </label>
+              </div>
+              <label class="full-width">
+                Description*
+                <textarea
+                  name="description"
+                  rows="4"
+                  placeholder="Highlight amenities, neighbourhood, utilities, and house rules."
+                  required
+                ></textarea>
+              </label>
+              <button type="submit" class="button button-primary">Publish property</button>
+              <p class="form-footnote">
+                Rent4Less validates submissions for accuracy. Approved listings appear in
+                the marketplace and alerts go out to matching tenants.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img class="footer-logo" src="rent4less.jpeg" alt="Rent4Less logo" />
+          <div>
+            <span class="brand-eyebrow">Rent4Less</span>
+            <h4>Affordable housing with verified trust.</h4>
+            <p>
+              We help working-class Ghanaians secure flexible rent while giving landlords
+              the assurance of guaranteed payouts.
+            </p>
+          </div>
+        </div>
+        <div>
+          <h5>For tenants</h5>
+          <ul>
+            <li><a href="listings.html">Browse homes</a></li>
+            <li><a href="rent-calculator.html">Rent calculator</a></li>
+            <li><a href="tenant-tools.html">Tenant tools</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>For landlords</h5>
+          <ul>
+            <li><a href="list-property.html">List a property</a></li>
+            <li><a href="model.html#partners">Partnerships</a></li>
+            <li><a href="model.html#how-it-works">Verification model</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Stay informed</h5>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Work email" />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Rent4Less. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
+
