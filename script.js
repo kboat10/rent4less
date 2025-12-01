@@ -1623,3 +1623,4 @@ if (document.readyState === 'loading') {
   // DOM is already ready, run immediately
   init();
 }
+}
