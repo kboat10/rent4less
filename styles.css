@@ -661,6 +661,21 @@ ul {
   border: none;
   background: none;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.property-actions .button-primary {
+  background: var(--color-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(7, 42, 58, 0.2);
+}
+
+.property-actions .button-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(7, 42, 58, 0.3);
 }
 
 .property-pill {
