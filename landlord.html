@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Your Property - Rent4Less</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>Rent4Less</h1>
+                <p class="tagline">See Before You Move</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Browse Listings</a>
+                <a href="landlord.html" class="nav-link active">List Your Property</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Landlord Form Section -->
+    <section class="landlord-section">
+        <div class="container">
+            <div class="landlord-header">
+                <h2>List Your Property</h2>
+                <p>Fill out the form below to get your property listed on Rent4Less. Our team will verify your listing and help you find tenants faster.</p>
+            </div>
+
+            <div class="form-container">
+                <form id="landlord-form" onsubmit="submitLandlordForm(event)">
+                    <!-- Landlord Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Landlord Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="landlord-name">Full Name *</label>
+                                <input type="text" id="landlord-name" name="landlord-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="landlord-phone">Phone Number *</label>
+                                <input type="tel" id="landlord-phone" name="landlord-phone" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="landlord-email">Email</label>
+                                <input type="email" id="landlord-email" name="landlord-email">
+                            </div>
+                            <div class="form-group">
+                                <label for="ghana-card">Ghana Card Number</label>
+                                <input type="text" id="ghana-card" name="ghana-card" placeholder="GHA-XXXXXXXX-X">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Property Details -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-home"></i> Property Details</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="property-address">Property Address *</label>
+                                <input type="text" id="property-address" name="property-address" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="property-location">Location/City *</label>
+                                <select id="property-location" name="property-location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="accra">Accra</option>
+                                    <option value="kumasi">Kumasi</option>
+                                    <option value="tema">Tema</option>
+                                    <option value="takoradi">Takoradi</option>
+                                    <option value="cape-coast">Cape Coast</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="room-type">Room Type *</label>
+                                <select id="room-type" name="room-type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="shared">Shared Room</option>
+                                    <option value="private">Private Room</option>
+                                    <option value="studio">Studio</option>
+                                    <option value="apartment">Apartment</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rent-price">Monthly Rent (₵) *</label>
+                                <input type="number" id="rent-price" name="rent-price" min="0" step="50" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="advance-payment">6-Month Advance Payment (₵)</label>
+                                <input type="number" id="advance-payment" name="advance-payment" readonly>
+                                <small>Automatically calculated (6 × monthly rent)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="property-description">Property Description *</label>
+                                <textarea id="property-description" name="property-description" rows="4" required placeholder="Describe your property, amenities, nearby facilities, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-images"></i> Property Images</h3>
+                        <div class="upload-area" id="upload-area">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload or drag and drop</p>
+                            <p class="upload-hint">Upload up to 10 images (JPG, PNG, max 5MB each)</p>
+                            <input type="file" id="property-images" name="property-images" multiple accept="image/*" onchange="handleImageUpload(event)">
+                        </div>
+                        <div class="image-preview-grid" id="image-preview-grid">
+                            <!-- Preview images will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- 3D Tour Option -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-cube"></i> 3D Virtual Tour (Optional)</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="has-3d-tour" name="has-3d-tour" onchange="toggle3DTourOption()">
+                                <span>I would like to add a 3D virtual tour for this property</span>
+                            </label>
+                            <small>Our team can help you create a professional 3D tour. This feature helps properties get rented faster.</small>
+                        </div>
+                        <div id="3d-tour-details" class="3d-tour-details" style="display: none;">
+                            <div class="form-group">
+                                <label for="3d-tour-link">3D Tour Link (if you already have one)</label>
+                                <input type="url" id="3d-tour-link" name="3d-tour-link" placeholder="https://...">
+                            </div>
+                            <p class="info-box">
+                                <i class="fas fa-info-circle"></i>
+                                If you don't have a 3D tour yet, our team will contact you to schedule a professional photo session.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Professional Photos -->
+                    <div class="form-section">
+                        <div class="info-box highlight">
+                            <i class="fas fa-camera"></i>
+                            <div>
+                                <h4>Free Professional Photos Available</h4>
+                                <p>We offer free professional photography for your property to make your listing stand out and look more trustworthy. This service is optional but highly recommended.</p>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="request-professional-photos" name="request-professional-photos">
+                                    <span>Yes, I would like free professional photos</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verification Info -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-shield-alt"></i> Verification Process</h3>
+                        <div class="info-box">
+                            <p>After you submit this form, our team will:</p>
+                            <ul>
+                                <li><i class="fas fa-phone"></i> Contact you via phone to verify your information</li>
+                                <li><i class="fas fa-id-card"></i> Verify your Ghana Card</li>
+                                <li><i class="fas fa-map-marker-alt"></i> Conduct a site visit if needed</li>
+                                <li><i class="fas fa-check-circle"></i> Once verified, your listing will go live</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn large">
+                        <i class="fas fa-paper-plane"></i> Submit Property Listing
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content success-modal">
+            <i class="fas fa-check-circle"></i>
+            <h2>Thank You!</h2>
+            <p>Your property listing has been submitted successfully.</p>
+            <p>Our team will contact you within 24-48 hours to verify your listing and complete the process.</p>
+            <button onclick="closeSuccessModal()" class="submit-btn">OK</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Rent4Less</h3>
+                    <p>Making rental housing accessible and transparent in Ghana.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Browse Listings</a>
+                    <a href="landlord.html">List Your Property</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fab fa-whatsapp"></i> WhatsApp: +233 XX XXX XXXX</p>
+                    <p><i class="fas fa-envelope"></i> Email: info@rent4less.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Rent4Less. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

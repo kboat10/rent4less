@@ -1,262 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RENT4LESS | Affordable, Flexible Renting in Ghana</title>
-    <link rel="icon" type="image/jpeg" href="rent4less.jpeg" />
-    <link rel="apple-touch-icon" href="rent4less.jpeg" />
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="container">
-        <nav class="navbar">
-          <a class="brand" href="#top">
-            <img class="brand-mark" src="rent4less.jpeg" alt="Rent4Less logo" />
-            <div>
-              <span class="brand-eyebrow">Rent4Less</span>
-              <h1>Homes that work for modern Ghana</h1>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent4Less - Find Your Perfect Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>Rent4Less</h1>
+                <p class="tagline">See Before You Move</p>
             </div>
-          </a>
-          <div class="nav-links">
-            <a href="model.html">Model</a>
-            <a href="listings.html">Homes</a>
-            <a href="rent-calculator.html">Affordability</a>
-            <a href="tenant-tools.html">Tenant tools</a>
-            <a href="list-property.html" class="button button-primary"
-              >List property</a
-            >
-          </div>
-        </nav>
-
-        <section class="hero" id="top">
-          <div class="hero-grid">
-            <div class="hero-copy">
-              <p class="eyebrow">Purpose-built for salary earners &amp; verified landlords</p>
-              <h2>
-                Transparent rentals. Flexible payments. Guaranteed confidence.
-              </h2>
-              <p class="lead">
-                Rent4Less pairs vetted tenants with partners who guarantee on-time rent.
-                Choose monthly or quarterly plans, preview every home virtually, and
-                grow a reputation score that keeps you moving forward.
-              </p>
-              <div class="hero-actions">
-                <a href="listings.html" class="button button-primary">Explore listings</a>
-                <a href="list-property.html" class="button button-ghost"
-                  >Partner with us</a
-                >
-              </div>
-              <div class="hero-highlights">
-                <div>
-                  <span class="highlight-number">92%</span>
-                  <p>of tenants prefer flexible rent over furnished extras.</p>
-                </div>
-                <div>
-                  <span class="highlight-number">48 hrs</span>
-                  <p>average verification time for new landlord listings.</p>
-                </div>
-                <div>
-                  <span class="highlight-number">GHS 2.8k</span>
-                  <p>median monthly rent secured via payroll-backed plans.</p>
-                </div>
-              </div>
-            </div>
-            <div class="hero-media">
-              <div class="hero-card calculator-preview">
-                <header class="calculator-preview__header">
-                  <span class="dot dot--red"></span>
-                  <span class="dot dot--amber"></span>
-                  <span class="dot dot--green"></span>
-                  <p>Instant Rent Calculator</p>
-                </header>
-                <div class="calculator-preview__body">
-                  <form id="heroCalculatorForm" class="calculator-preview__form" autocomplete="off">
-                    <label>
-                      Monthly income
-                      <div class="input-mock">
-                        <span class="input-prefix">GHS</span>
-                        <input type="number" name="income" min="0" value="7500" required />
-                      </div>
-                    </label>
-                    <label>
-                      Household size
-                      <div class="input-mock input-mock--select">
-                        <select name="household">
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3" selected>3</option>
-                          <option value="4">4</option>
-                          <option value="5">5</option>
-                          <option value="6">6+</option>
-                        </select>
-                        <span class="input-caret">▾</span>
-                      </div>
-                    </label>
-                    <label>
-                      Preferred neighbourhood
-                      <div class="input-mock">
-                        <input
-                          type="text"
-                          name="neighborhood"
-                          placeholder="e.g. East Legon"
-                          value="East Legon"
-                        />
-                      </div>
-                    </label>
-                    <button type="submit" class="button button-primary">Calculate affordability</button>
-                  </form>
-                  <aside class="calculator-preview__summary" id="heroCalculatorResult">
-                    <div class="calc-placeholder">
-                      <p class="summary-eyebrow">Estimated rent budget</p>
-                      <p class="calc-empty-copy">Enter your income to discover a realistic monthly rent and matched homes.</p>
-                    </div>
-                  </aside>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link active">Browse Listings</a>
+                <a href="landlord.html" class="nav-link">List Your Property</a>
+            </nav>
+        </div>
     </header>
 
-    <section class="trusted-strip">
-      <div class="container">
-        <p>Trusted by forward-thinking employers, banks, and proptech partners across Accra.</p>
-        <ul>
-          <li>Payroll-backed rent payouts</li>
-          <li>Fraud-screened property onboarding</li>
-          <li>Tenant education &amp; dispute mediation</li>
-        </ul>
-      </div>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h2>Find Your Perfect Home</h2>
+            <p>Verified listings with 3D tours. Pay 6 months in advance and move in with confidence.</p>
+        </div>
     </section>
 
-    <main>
-      <section class="home-highlights">
+    <!-- Search Filters -->
+    <section class="filters-section">
         <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Explore the platform</p>
-            <h3>Everything you need to rent with confidence</h3>
-            <p>
-              Navigate flexible payment plans, browse curated homes, and empower tenants and landlords with data-driven tools tailored to Ghana.
-            </p>
-          </div>
-          <div class="highlight-grid">
-            <article class="highlight-card">
-              <h4>Platform model</h4>
-              <p>
-                See how Rent4Less combines employer partnerships, verified listings, and tenant reputation scoring to keep both sides secure.
-              </p>
-              <a class="link-inline" href="model.html">View the model</a>
-            </article>
-            <article class="highlight-card">
-              <h4>Curated homes</h4>
-              <p>
-                Filter rentals by budget, payment flexibility, or neighbourhood and save favourites to revisit with family or HR.
-              </p>
-              <a class="link-inline" href="listings.html">Browse homes</a>
-            </article>
-            <article class="highlight-card">
-              <h4>Tenant success</h4>
-              <p>
-                Access smart tours, the tenant academy, and scoring insights that build long-term rental credibility.
-              </p>
-              <a class="link-inline" href="tenant-tools.html">Discover tools</a>
-            </article>
-            <article class="highlight-card">
-              <h4>List a property</h4>
-              <p>
-                Submit your rental in minutes, tap into our verified tenant pool, and enjoy guaranteed payouts supported by payroll integrations.
-              </p>
-              <a class="link-inline" href="list-property.html">Start listing</a>
-            </article>
-          </div>
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="budget-filter">
+                        <i class="fas fa-dollar-sign"></i> Budget
+                    </label>
+                    <select id="budget-filter" class="filter-select">
+                        <option value="">All Budgets</option>
+                        <option value="0-500">₵0 - ₵500/month</option>
+                        <option value="500-1000">₵500 - ₵1,000/month</option>
+                        <option value="1000-2000">₵1,000 - ₵2,000/month</option>
+                        <option value="2000-3000">₵2,000 - ₵3,000/month</option>
+                        <option value="3000+">₵3,000+/month</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="location-filter">
+                        <i class="fas fa-map-marker-alt"></i> Location
+                    </label>
+                    <select id="location-filter" class="filter-select">
+                        <option value="">All Locations</option>
+                        <option value="accra">Accra</option>
+                        <option value="kumasi">Kumasi</option>
+                        <option value="tema">Tema</option>
+                        <option value="takoradi">Takoradi</option>
+                        <option value="cape-coast">Cape Coast</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="room-type-filter">
+                        <i class="fas fa-bed"></i> Room Type
+                    </label>
+                    <select id="room-type-filter" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="shared">Shared Room</option>
+                        <option value="private">Private Room</option>
+                        <option value="studio">Studio</option>
+                        <option value="apartment">Apartment</option>
+                    </select>
+                </div>
+                <button class="filter-reset-btn" onclick="resetFilters()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
         </div>
-      </section>
-    </main>
+    </section>
 
-    <footer class="site-footer">
-      <div class="container footer-grid">
-        <div class="footer-brand">
-          <img class="footer-logo" src="rent4less.jpeg" alt="Rent4Less logo" />
-          <div>
-            <span class="brand-eyebrow">Rent4Less</span>
-            <h4>Affordable housing with verified trust.</h4>
-            <p>
-              We help working-class Ghanaians secure flexible rent while giving landlords
-              the assurance of guaranteed payouts.
-            </p>
-          </div>
+    <!-- Listings Section -->
+    <section class="listings-section">
+        <div class="container">
+            <div class="listings-header">
+                <h2>Verified Listings</h2>
+                <p class="listings-count" id="listings-count">Showing <span id="count">0</span> properties</p>
+            </div>
+            <div class="listings-grid" id="listings-grid">
+                <!-- Listings will be dynamically loaded here -->
+            </div>
         </div>
-        <div>
-          <h5>For tenants</h5>
-          <ul>
-            <li><a href="listings.html">Browse homes</a></li>
-            <li><a href="rent-calculator.html">Rent calculator</a></li>
-            <li><a href="tenant-tools.html">Tenant tools</a></li>
-          </ul>
+    </section>
+
+    <!-- Viewing Request Modal -->
+    <div id="viewing-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeViewingModal()">&times;</span>
+            <h2>Request a Viewing</h2>
+            <form id="viewing-request-form" onsubmit="submitViewingRequest(event)">
+                <div class="form-group">
+                    <label for="tenant-name">Full Name *</label>
+                    <input type="text" id="tenant-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="tenant-phone">Phone Number *</label>
+                    <input type="tel" id="tenant-phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="tenant-email">Email</label>
+                    <input type="email" id="tenant-email" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="preferred-date">Preferred Viewing Date</label>
+                    <input type="date" id="preferred-date" name="preferred-date">
+                </div>
+                <div class="form-group">
+                    <label for="message">Additional Message</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+                <input type="hidden" id="property-id" name="property-id">
+                <button type="submit" class="submit-btn">Submit Request</button>
+            </form>
         </div>
-        <div>
-          <h5>For landlords</h5>
-          <ul>
-            <li><a href="list-property.html">List a property</a></li>
-            <li><a href="model.html#partners">Partnerships</a></li>
-            <li><a href="model.html">Verification model</a></li>
-          </ul>
+    </div>
+
+    <!-- 3D Tour Modal -->
+    <div id="3d-modal" class="modal">
+        <div class="modal-content modal-3d">
+            <span class="close-modal" onclick="close3DModal()">&times;</span>
+            <h2 id="3d-property-title">3D Virtual Tour</h2>
+            <div class="3d-viewer" id="3d-viewer">
+                <div class="3d-placeholder">
+                    <i class="fas fa-cube"></i>
+                    <p>3D Tour Loading...</p>
+                    <p class="3d-note">Experience the property in 360° before you visit</p>
+                </div>
+            </div>
         </div>
-        <div>
-          <h5>Stay informed</h5>
-          <form class="newsletter-form">
-            <input type="email" placeholder="Work email" />
-            <button type="submit">Subscribe</button>
-          </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Rent4Less</h3>
+                    <p>Making rental housing accessible and transparent in Ghana.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Browse Listings</a>
+                    <a href="landlord.html">List Your Property</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fab fa-whatsapp"></i> WhatsApp: +233 XX XXX XXXX</p>
+                    <p><i class="fas fa-envelope"></i> Email: info@rent4less.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Rent4Less. All rights reserved.</p>
+            </div>
         </div>
-      </div>
-      <p class="footer-meta">© <span id="year"></span> Rent4Less. All rights reserved.</p>
     </footer>
 
-    <div class="modal" id="reputationModal">
-      <div class="modal-content">
-        <button class="modal-close" data-close>&times;</button>
-        <h4>How the Tenant Reputation Score works</h4>
-        <ul>
-          <li>Every payment you make through Rent4Less builds your score.</li>
-          <li>Landlords leave transparent reviews after each tenancy.</li>
-          <li>High scores unlock incentives like reduced deposits.</li>
-          <li>Employers can sponsor tenants with outstanding performance.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="modal" id="tourModal">
-      <div class="modal-content">
-        <button class="modal-close" data-close>&times;</button>
-        <h4>Sample 3D Smart Tour</h4>
-        <div class="tour-embed">
-          <iframe
-            src="https://my.matterport.com/show/?m=BM7s6FDX6zF"
-            title="Sample 3D Apartment Tour"
-            allow="xr-spatial-tracking; gyroscope; accelerometer"
-          ></iframe>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal" id="propertyModal">
-      <div class="modal-content property-modal">
-        <button class="modal-close" data-close>&times;</button>
-        <div id="propertyModalContent"></div>
-      </div>
-    </div>
-
-    <script src="script.js" defer></script>
-  </body>
+    <script src="script.js"></script>
+</body>
 </html>
-
