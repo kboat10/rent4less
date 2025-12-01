@@ -620,7 +620,15 @@ var properties = [];
 let savedPropertyIds = loadSavedProperties();
 
 // IMMEDIATE FALLBACK: Pre-load embedded data to ensure properties are always available
+console.log("🔄 Running preloadProperties function...");
+console.log("🔍 EMBEDDED_LISTINGS_DATA exists:", typeof EMBEDDED_LISTINGS_DATA !== 'undefined');
+if (typeof EMBEDDED_LISTINGS_DATA !== 'undefined') {
+  console.log("🔍 EMBEDDED_LISTINGS_DATA.listings exists:", !!EMBEDDED_LISTINGS_DATA.listings);
+  console.log("🔍 Is array:", Array.isArray(EMBEDDED_LISTINGS_DATA.listings));
+}
+
 (function preloadProperties() {
+  console.log("🔄 Inside preloadProperties function");
   if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
     properties = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
       ...listing,
@@ -628,8 +636,15 @@ let savedPropertyIds = loadSavedProperties();
     }));
     console.log(`✅ Pre-loaded ${properties.length} properties from embedded data (immediate fallback)`);
     console.log(`✅ Properties array now exists:`, typeof properties !== 'undefined', 'Length:', properties.length);
+    // Make it globally accessible
+    window.properties = properties;
+    console.log("✅ Made properties globally accessible via window.properties");
   } else {
     console.error("❌ EMBEDDED_LISTINGS_DATA not found or invalid!");
+    console.error("EMBEDDED_LISTINGS_DATA:", typeof EMBEDDED_LISTINGS_DATA);
+    if (typeof EMBEDDED_LISTINGS_DATA !== 'undefined') {
+      console.error("EMBEDDED_LISTINGS_DATA.listings:", EMBEDDED_LISTINGS_DATA.listings);
+    }
   }
 })();
 
