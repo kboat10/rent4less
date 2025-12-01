@@ -786,6 +786,25 @@ function open3DTourModal(property) {
   
   // Update modal content
   const tourUrl = property.tour;
+  
+  // Check if it's a direct iframe-embeddable URL or needs special handling
+  // Most platforms (Matterport, Zillow, Metareal, etc.) work with iframes
+  const isDirectEmbed = tourUrl.includes('matterport.com') || 
+                        tourUrl.includes('zillow.com') || 
+                        tourUrl.includes('metareal.com') ||
+                        tourUrl.includes('cupix.com') ||
+                        tourUrl.includes('eyespy360.com') ||
+                        tourUrl.includes('panopedia.com') ||
+                        tourUrl.includes('panoee.com') ||
+                        tourUrl.includes('koala360.com') ||
+                        tourUrl.includes('hugepano.com');
+  
+  // If it's not a direct embed URL, try to open in new tab or show as link
+  if (!isDirectEmbed && !tourUrl.startsWith('http')) {
+    window.open(tourUrl, '_blank');
+    return;
+  }
+  
   tourModal.innerHTML = `
     <div class="modal-content" style="max-width: 95vw; max-height: 95vh; width: 1400px; padding: 0; overflow: hidden;">
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: var(--color-surface); border-bottom: 1px solid rgba(0,0,0,0.1);">
@@ -796,11 +815,16 @@ function open3DTourModal(property) {
         <iframe 
           src="${tourUrl}" 
           style="width: 100%; height: 100%; border: none; display: block;"
-          allow="xr-spatial-tracking; camera; microphone; fullscreen"
+          allow="xr-spatial-tracking; camera; microphone; fullscreen; vr"
           allowfullscreen
           loading="lazy"
           title="3D Tour - ${property.title}">
         </iframe>
+        <div style="position: absolute; bottom: 16px; right: 16px;">
+          <a href="${tourUrl}" target="_blank" style="background: rgba(13, 59, 82, 0.9); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; display: inline-block;">
+            Open in new tab ↗
+          </a>
+        </div>
       </div>
     </div>
   `;
