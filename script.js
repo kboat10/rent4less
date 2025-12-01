@@ -758,7 +758,7 @@ function openPropertyModal(property) {
     ${property.amenities && property.amenities.length > 0 ? `<div style="margin-bottom: 24px;"><strong>Amenities:</strong> ${property.amenities.join(", ")}</div>` : ""}
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
       <button class="button button-primary" onclick="toggleFavorite('${property.id}'); document.getElementById('propertyModal').classList.remove('open');">${isSaved ? "★ Remove from Saved" : "☆ Save Property"}</button>
-      ${property.tour && property.tour.trim() !== "" ? `<button class="button" onclick="open3DTourModal(${JSON.stringify(property).replace(/"/g, '&quot;')})">View 3D Tour</button>` : ""}
+      ${property.tour && property.tour.trim() !== "" ? `<button class="button" data-property-id="${property.id}" onclick="handleTourButtonClick('${property.id}')">View 3D Tour</button>` : ""}
       <button class="button" onclick="openViewingRequestModal('${property.id}')">Request Viewing</button>
     </div>
   `;
@@ -774,30 +774,51 @@ function open3DTourModal(property) {
     tourModal = document.createElement("div");
     tourModal.id = "tourModal";
     tourModal.className = "modal";
-    tourModal.innerHTML = `
-      <div class="modal-content" style="max-width: 90vw; max-height: 90vh; width: 1200px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3>3D Tour - ${property.title}</h3>
-          <button class="modal-close" onclick="document.getElementById('tourModal').classList.remove('open')" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-        </div>
-        <iframe src="${property.tour}" style="width: 100%; height: 80vh; border: none; border-radius: 8px;"></iframe>
-      </div>
-    `;
     document.body.appendChild(tourModal);
+    
+    // Close on background click
     tourModal.addEventListener("click", (e) => {
       if (e.target === tourModal) {
         tourModal.classList.remove("open");
       }
     });
-    tourModal.classList.add("open");
-  } else {
-    const iframe = tourModal.querySelector("iframe");
-    if (iframe) iframe.src = property.tour;
-    const title = tourModal.querySelector("h3");
-    if (title) title.textContent = `3D Tour - ${property.title}`;
-    tourModal.classList.add("open");
+  }
+  
+  // Update modal content
+  const tourUrl = property.tour;
+  tourModal.innerHTML = `
+    <div class="modal-content" style="max-width: 95vw; max-height: 95vh; width: 1400px; padding: 0; overflow: hidden;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: var(--color-surface); border-bottom: 1px solid rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 1.25rem; color: var(--color-secondary);">3D Tour - ${property.title}</h3>
+        <button class="modal-close" onclick="document.getElementById('tourModal').classList.remove('open')" style="background: rgba(13, 59, 82, 0.12); border: none; font-size: 24px; cursor: pointer; color: var(--color-primary); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+      </div>
+      <div style="position: relative; width: 100%; height: calc(95vh - 80px); min-height: 600px;">
+        <iframe 
+          src="${tourUrl}" 
+          style="width: 100%; height: 100%; border: none; display: block;"
+          allow="xr-spatial-tracking; camera; microphone; fullscreen"
+          allowfullscreen
+          loading="lazy"
+          title="3D Tour - ${property.title}">
+        </iframe>
+      </div>
+    </div>
+  `;
+  
+  tourModal.classList.add("open");
+}
+
+// Helper function to handle tour button clicks from property modal
+function handleTourButtonClick(propertyId) {
+  const property = properties.find(p => p.id === propertyId);
+  if (property) {
+    open3DTourModal(property);
   }
 }
+
+// Make functions globally accessible
+window.open3DTourModal = open3DTourModal;
+window.handleTourButtonClick = handleTourButtonClick;
 
 function openViewingRequestModal(propertyId) {
   const property = properties.find(p => p.id === propertyId);
