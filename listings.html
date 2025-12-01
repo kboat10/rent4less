@@ -207,6 +207,21 @@
     </div>
 
     <script src="script.js" defer></script>
+    <script>
+      // Test script connection
+      console.log("✅ listings.html script tag executed");
+      console.log("📄 Page URL:", window.location.href);
+      
+      // Verify script.js loaded
+      window.addEventListener('load', function() {
+        console.log("✅ Page fully loaded");
+        console.log("🔍 Checking for listingGrid:", !!document.getElementById("listingGrid"));
+        console.log("🔍 Properties array exists:", typeof properties !== 'undefined');
+        if (typeof properties !== 'undefined') {
+          console.log("🔍 Properties count:", properties.length);
+        }
+      });
+    </script>
   </body>
 </html>
 

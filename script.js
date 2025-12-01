@@ -1,3 +1,7 @@
+// Script loaded indicator
+console.log("✅ script.js loaded successfully");
+
+// Get DOM elements (these may be null if script runs before DOM is ready, which is fine)
 const propertyForm = document.getElementById("propertyForm");
 const listingGrid = document.getElementById("listingGrid");
 const savedGrid = document.getElementById("savedGrid");
@@ -12,6 +16,14 @@ const heroCalculatorResult = document.getElementById("heroCalculatorResult");
 const yearSpan = document.getElementById("year");
 const propertyModal = document.getElementById("propertyModal");
 const propertyModalContent = document.getElementById("propertyModalContent");
+
+// Log element availability
+console.log("🔍 DOM Elements check:", {
+  listingGrid: !!listingGrid,
+  savedGrid: !!savedGrid,
+  budgetFilter: !!budgetFilter,
+  flexibilityFilter: !!flexibilityFilter
+});
 
 const STORAGE_KEY = "rent4less-properties";
 const FAVORITES_KEY = "rent4less-favorites";
@@ -1462,10 +1474,20 @@ function toggleFavorite(propertyId, options = {}) {
 }
 
 async function init() {
+  console.log("🚀 INIT FUNCTION CALLED");
+  console.log("📄 Current page:", window.location.pathname);
+  
   // Show loading state
   const listingGridEl = document.getElementById("listingGrid");
+  console.log("🔍 listingGrid element found:", !!listingGridEl);
+  
   if (listingGridEl) {
     listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
+  } else {
+    console.error("❌ CRITICAL: listingGrid element NOT FOUND in DOM!");
+    console.log("Available elements with 'listing' in id:", 
+      Array.from(document.querySelectorAll('[id*="listing"]')).map(el => el.id)
+    );
   }
   
   // IMMEDIATE FALLBACK: Load embedded data first to ensure we always have properties
