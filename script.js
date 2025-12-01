@@ -828,6 +828,8 @@ function createPropertyCard(property, options = {}) {
 }
 
 function renderProperties(list = null, target = null, options = {}) {
+  console.log("🔄 renderProperties() called with list length:", list ? list.length : 0);
+  
   // If no target provided, try to find listingGrid
   if (!target) {
     target = document.getElementById("listingGrid");
@@ -836,20 +838,25 @@ function renderProperties(list = null, target = null, options = {}) {
     console.error("❌ Cannot render: listingGrid element not found");
     return;
   }
+  console.log("✅ Target element found:", target.id);
   
   target.innerHTML = "";
+  console.log("✅ Cleared target innerHTML");
   
   // Determine which list to use
   let propertiesToRender = [];
   if (list && Array.isArray(list) && list.length > 0) {
     propertiesToRender = list;
+    console.log("✅ Using provided list:", list.length);
   } else if (properties && Array.isArray(properties) && properties.length > 0) {
     propertiesToRender = properties;
+    console.log("✅ Using global properties array:", properties.length);
   } else {
     console.warn("⚠️ No properties to render. List:", list, "Properties:", properties);
   }
   
   if (!propertiesToRender.length) {
+    console.log("⚠️ No properties to render, showing empty state");
     const emptyState = document.createElement("div");
     emptyState.className = "empty-state";
     const message = (!properties || properties.length === 0) 
@@ -865,17 +872,24 @@ function renderProperties(list = null, target = null, options = {}) {
   }
   
   console.log(`🔄 Rendering ${propertiesToRender.length} property cards...`);
-  propertiesToRender.forEach((property) => {
+  let renderedCount = 0;
+  propertiesToRender.forEach((property, index) => {
     try {
+      console.log(`🔄 Creating card ${index + 1}/${propertiesToRender.length} for:`, property.title);
       const card = createPropertyCard(property, options);
       if (card) {
         target.appendChild(card);
+        renderedCount++;
+        console.log(`✅ Card ${index + 1} appended successfully`);
+      } else {
+        console.error(`❌ Card ${index + 1} is null`);
       }
     } catch (error) {
-      console.error("❌ Error creating property card:", error, property);
+      console.error(`❌ Error creating property card ${index + 1}:`, error, property);
     }
   });
-  console.log(`✅ Rendered ${propertiesToRender.length} property cards`);
+  console.log(`✅ Rendered ${renderedCount}/${propertiesToRender.length} property cards`);
+  console.log(`🔍 Final children count in listingGrid:`, target.children.length);
 }
 
 function renderSavedProperties() {
@@ -973,11 +987,13 @@ function getFilteredProperties() {
 }
 
 function renderWithActiveFilters() {
+  console.log("🔄 renderWithActiveFilters() called");
   const listingGridEl = document.getElementById("listingGrid");
   if (!listingGridEl) {
-    console.warn("⚠️ listingGrid element not found");
+    console.error("❌ listingGrid element not found!");
     return;
   }
+  console.log("✅ listingGrid element found");
   
   // Ensure properties array exists and has data
   if (!properties || !Array.isArray(properties) || properties.length === 0) {
@@ -985,9 +1001,11 @@ function renderWithActiveFilters() {
     listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
     return;
   }
+  console.log(`✅ Properties available: ${properties.length}`);
   
   const filtered = getFilteredProperties();
   console.log(`🔄 Rendering ${filtered.length} filtered properties out of ${properties.length} total`);
+  console.log("🔍 Filtered properties:", filtered);
   
   // Always render, even if filtered is empty (will show "no matches" message)
   renderProperties(filtered, listingGridEl);
@@ -997,6 +1015,15 @@ function renderWithActiveFilters() {
   if (countElement) {
     countElement.textContent = filtered.length;
   }
+  
+  // Verify rendering happened
+  setTimeout(() => {
+    const childrenCount = listingGridEl.children.length;
+    console.log(`🔍 After render, listingGrid has ${childrenCount} children`);
+    if (childrenCount === 0 && filtered.length > 0) {
+      console.error("❌ RENDERING FAILED: Properties exist but no children in listingGrid!");
+    }
+  }, 100);
 }
 
 function applyFilters() {
