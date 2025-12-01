@@ -1556,31 +1556,35 @@ async function init() {
   const calculatorPlaceholder =
     "Enter your income to discover a realistic monthly rent and matched homes.";
 
-  setupCalculatorForm(calculatorForm, calculatorResult, {
-    placeholderMessage: calculatorPlaceholder,
-  });
+  if (calculatorForm && calculatorResult) {
+    setupCalculatorForm(calculatorForm, calculatorResult, {
+      placeholderMessage: calculatorPlaceholder,
+    });
+  }
 
-  setupCalculatorForm(heroCalculatorForm, heroCalculatorResult, {
-    defaults: { income: 7500, household: 3, neighborhood: "East Legon" },
-    placeholderMessage: calculatorPlaceholder,
-    syncOnInit: false,
-    onResult: (data) => {
-      renderCalculatorSummary(calculatorResult, data, {
-        placeholderMessage: calculatorPlaceholder,
-      });
-      if (calculatorForm) {
-        if (calculatorForm.elements["income"]) {
-          calculatorForm.elements["income"].value = data.income;
+  if (heroCalculatorForm && heroCalculatorResult) {
+    setupCalculatorForm(heroCalculatorForm, heroCalculatorResult, {
+      defaults: { income: 7500, household: 3, neighborhood: "East Legon" },
+      placeholderMessage: calculatorPlaceholder,
+      syncOnInit: false,
+      onResult: (data) => {
+        renderCalculatorSummary(calculatorResult, data, {
+          placeholderMessage: calculatorPlaceholder,
+        });
+        if (calculatorForm) {
+          if (calculatorForm.elements["income"]) {
+            calculatorForm.elements["income"].value = data.income;
+          }
+          if (calculatorForm.elements["household"]) {
+            calculatorForm.elements["household"].value = data.household;
+          }
+          if (calculatorForm.elements["neighborhood"]) {
+            calculatorForm.elements["neighborhood"].value = data.neighborhood || "";
+          }
         }
-        if (calculatorForm.elements["household"]) {
-          calculatorForm.elements["household"].value = data.household;
-        }
-        if (calculatorForm.elements["neighborhood"]) {
-          calculatorForm.elements["neighborhood"].value = data.neighborhood || "";
-        }
-      }
-    },
-  });
+      },
+    });
+  }
 }
 
 // Event listeners - set up after DOM is ready
@@ -1617,3 +1621,5 @@ if (document.readyState === 'loading') {
   init();
 }
 
+
+}
