@@ -1617,10 +1617,19 @@ document.querySelectorAll(".newsletter-form").forEach(form => {
 });
 
 // Initialize immediately when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  // DOM is already ready, run immediately
-  init();
-}
+// Force init to run after a short delay to ensure everything is ready
+(function() {
+  function runInit() {
+    console.log("🔄 Attempting to run init()...");
+    console.log("🔍 Properties before init:", typeof properties !== 'undefined' ? properties.length : 'undefined');
+    init();
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", runInit);
+  } else {
+    // DOM is already ready, run immediately
+    setTimeout(runInit, 100);
+  }
+})();
 }
