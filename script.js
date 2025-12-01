@@ -514,9 +514,12 @@ function renderProperties(list = properties, target = listingGrid, options = {})
   if (!propertiesToRender.length) {
     const emptyState = document.createElement("div");
     emptyState.className = "empty-state";
+    const message = (properties && properties.length === 0) 
+      ? "Loading properties..." 
+      : "No properties found for the selected filters. Try adjusting your budget or payment plan.";
     emptyState.innerHTML = `
       <p style="text-align: center; padding: 48px; color: var(--color-muted);">
-        No properties found for the selected filters. Try adjusting your budget or payment plan.
+        ${message}
       </p>
     `;
     target.appendChild(emptyState);
