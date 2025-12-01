@@ -147,6 +147,41 @@
       </div>
     </div>
 
+    <!-- Viewing Request Modal -->
+    <div class="modal" id="viewingRequestModal">
+      <div class="modal-content">
+        <button class="modal-close" data-close>&times;</button>
+        <h4>Request a Viewing</h4>
+        <form id="viewingRequestForm" class="property-form">
+          <label>
+            Full Name *
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            Phone Number *
+            <input type="tel" name="phone" required />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" />
+          </label>
+          <label>
+            Preferred Viewing Date
+            <input type="date" name="preferredDate" />
+          </label>
+          <label class="full-width">
+            Additional Message
+            <textarea name="message" rows="3" placeholder="Any specific questions or requests..."></textarea>
+          </label>
+          <input type="hidden" id="viewingPropertyId" name="propertyId" />
+          <button type="submit" class="button button-primary">Submit Request</button>
+          <p class="form-footnote">
+            Our team will contact you via WhatsApp within 24 hours to confirm your viewing appointment.
+          </p>
+        </form>
+      </div>
+    </div>
+
     <script src="script.js" defer></script>
   </body>
 </html>

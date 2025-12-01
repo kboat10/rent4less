@@ -1,435 +1,712 @@
-// Sample listings data (in production, this would come from a backend/API)
-const sampleListings = [
-    {
-        id: 1,
-        title: "Modern Studio Apartment",
-        location: "Accra, East Legon",
-        roomType: "studio",
-        rent: 1500,
-        advance: 9000,
-        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-        has3DTour: true,
-        description: "Beautiful modern studio with all amenities",
-        verified: true
-    },
-    {
-        id: 2,
-        title: "Cozy Shared Room",
-        location: "Kumasi, Adum",
-        roomType: "shared",
-        rent: 400,
-        advance: 2400,
-        image: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800",
-        has3DTour: false,
-        description: "Comfortable shared room in a safe neighborhood",
-        verified: true
-    },
-    {
-        id: 3,
-        title: "Spacious Private Room",
-        location: "Accra, Osu",
-        roomType: "private",
-        rent: 800,
-        advance: 4800,
-        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-        has3DTour: true,
-        description: "Private room with ensuite bathroom",
-        verified: true
-    },
-    {
-        id: 4,
-        title: "Luxury 2-Bedroom Apartment",
-        location: "Tema, Community 1",
-        roomType: "apartment",
-        rent: 2500,
-        advance: 15000,
-        image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
-        has3DTour: false,
-        description: "Fully furnished luxury apartment",
-        verified: true
-    },
-    {
-        id: 5,
-        title: "Affordable Studio",
-        location: "Takoradi, Airport Ridge",
-        roomType: "studio",
-        rent: 600,
-        advance: 3600,
-        image: "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800",
-        has3DTour: false,
-        description: "Budget-friendly studio in great location",
-        verified: true
-    },
-    {
-        id: 6,
-        title: "Premium Shared Space",
-        location: "Cape Coast, University Area",
-        roomType: "shared",
-        rent: 350,
-        advance: 2100,
-        image: "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=800",
-        has3DTour: true,
-        description: "Well-maintained shared accommodation",
-        verified: true
-    }
+const propertyForm = document.getElementById("propertyForm");
+const listingGrid = document.getElementById("listingGrid");
+const savedGrid = document.getElementById("savedGrid");
+const budgetFilter = document.getElementById("budgetFilter");
+const flexibilityFilter = document.getElementById("flexibilityFilter");
+const applyFiltersButton = document.getElementById("applyFilters");
+const resetFiltersButton = document.getElementById("resetFilters");
+const calculatorForm = document.getElementById("calculatorForm");
+const calculatorResult = document.getElementById("calculatorResult");
+const heroCalculatorForm = document.getElementById("heroCalculatorForm");
+const heroCalculatorResult = document.getElementById("heroCalculatorResult");
+const yearSpan = document.getElementById("year");
+const propertyModal = document.getElementById("propertyModal");
+const propertyModalContent = document.getElementById("propertyModalContent");
+
+const STORAGE_KEY = "rent4less-properties";
+const FAVORITES_KEY = "rent4less-favorites";
+
+const defaultProperties = [
+  {
+    id: crypto.randomUUID(),
+    title: "Modern 2-Bed Apartment · East Legon",
+    location: "East Legon, Accra",
+    price: 3200,
+    paymentFlexibility: "Monthly or Quarterly",
+    bedrooms: 2,
+    bathrooms: 2,
+    area: 95,
+    description:
+      "Furnished apartment with backup power, Wi-Fi, and proximity to business hubs. Employer-backed payment guaranteed.",
+    image:
+      "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981440/east-legon-apartment.jpg",
+    tour: "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Studio Loft · Osu",
+    location: "Osu, Accra",
+    price: 1800,
+    paymentFlexibility: "Monthly",
+    bedrooms: 1,
+    bathrooms: 1,
+    area: 52,
+    description:
+      "Bright loft with 3D Smart Tour available. Ideal for young professionals who want nightlife and short commutes.",
+    image:
+      "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981440/osu-loft.jpg",
+    tour: "",
+  },
+  {
+    id: crypto.randomUUID(),
+    title: "Family Home · Tema Community 10",
+    location: "Tema Community 10",
+    price: 2500,
+    paymentFlexibility: "Quarterly",
+    bedrooms: 3,
+    bathrooms: 3,
+    area: 140,
+    description:
+      "Spacious home with private compound and community security. Tenant reputation score of previous tenant: 4.8/5.",
+    image:
+      "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981440/tema-family-home.jpg",
+    tour: "",
+  },
 ];
 
-let filteredListings = [...sampleListings];
-let uploadedImages = [];
+function loadProperties() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProperties));
+    return [...defaultProperties];
+  }
+  try {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn("Failed to parse saved properties", error);
+  }
+  return [...defaultProperties];
+}
 
-// Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('listings-grid')) {
-        renderListings();
-        setupFilters();
-    }
-    
-    if (document.getElementById('rent-price')) {
-        setupLandlordForm();
-    }
-});
+let properties = loadProperties();
+let savedPropertyIds = loadSavedProperties();
 
-// Render listings
-function renderListings() {
-    const grid = document.getElementById('listings-grid');
-    const countElement = document.getElementById('count');
-    
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    countElement.textContent = filteredListings.length;
-    
-    if (filteredListings.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-light);"><i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No properties found matching your criteria.</p></div>';
-        return;
+function saveProperties() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(properties));
+}
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat("en-GH", {
+    style: "currency",
+    currency: "GHS",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function loadSavedProperties() {
+  const saved = localStorage.getItem(FAVORITES_KEY);
+  if (!saved) return [];
+  try {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed)) {
+      return parsed;
     }
-    
-    filteredListings.forEach(listing => {
-        const card = createListingCard(listing);
-        grid.appendChild(card);
+  } catch (error) {
+    console.warn("Failed to parse saved homes", error);
+  }
+  return [];
+}
+
+function persistSavedProperties() {
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(savedPropertyIds));
+}
+
+function createPropertyCard(property, options = {}) {
+  const { showRemove = false } = options;
+  const card = document.createElement("article");
+  card.className = "property-card";
+
+  const img = document.createElement("img");
+  img.src =
+    property.image ||
+    "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981545/rent4less-placeholder.jpg";
+  img.alt = property.title;
+  card.appendChild(img);
+
+  const favoriteButton = document.createElement("button");
+  favoriteButton.className = "favorite-toggle";
+  favoriteButton.dataset.id = property.id;
+  favoriteButton.dataset.active = savedPropertyIds.includes(property.id)
+    ? "true"
+    : "false";
+  favoriteButton.innerHTML =
+    favoriteButton.dataset.active === "true" ? "★ Saved" : "☆ Save";
+  favoriteButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleFavorite(property.id);
+  });
+  card.appendChild(favoriteButton);
+
+  const content = document.createElement("div");
+  content.className = "property-content";
+
+  const title = document.createElement("h4");
+  title.textContent = property.title;
+  content.appendChild(title);
+
+  const location = document.createElement("p");
+  location.className = "property-location";
+  location.textContent = property.location;
+  content.appendChild(location);
+
+  const price = document.createElement("p");
+  price.className = "property-price";
+  price.innerHTML = `<span class="estimate-highlight">${formatCurrency(
+    property.price
+  )}</span> per month`;
+  content.appendChild(price);
+
+  const meta = document.createElement("div");
+  meta.className = "property-meta";
+  if (property.bedrooms) {
+    meta.innerHTML += `<span>🛏 ${property.bedrooms} bed${
+      property.bedrooms > 1 ? "s" : ""
+    }</span>`;
+  }
+  if (property.bathrooms) {
+    meta.innerHTML += `<span>🛁 ${property.bathrooms} bath${
+      property.bathrooms > 1 ? "s" : ""
+    }</span>`;
+  }
+  if (property.area) {
+    meta.innerHTML += `<span>📐 ${property.area} m²</span>`;
+  }
+  content.appendChild(meta);
+
+  const description = document.createElement("p");
+  description.textContent = property.description;
+  content.appendChild(description);
+
+  const actions = document.createElement("div");
+  actions.className = "property-actions";
+  const pill = document.createElement("span");
+  pill.className = "property-pill";
+  pill.textContent = property.paymentFlexibility || "Flexible";
+  actions.appendChild(pill);
+
+  const tourLink = document.createElement("a");
+  if (property.tour) {
+    tourLink.href = property.tour;
+    tourLink.target = "_blank";
+    tourLink.rel = "noopener";
+    tourLink.textContent = "View 3D tour";
+  } else {
+    tourLink.href = "#tenant-tools";
+    tourLink.textContent = "Request tour";
+  }
+  actions.appendChild(tourLink);
+
+  const detailsButton = document.createElement("button");
+  detailsButton.type = "button";
+  detailsButton.textContent = "View details";
+  detailsButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openPropertyModal(property);
+  });
+  actions.appendChild(detailsButton);
+
+  if (showRemove) {
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleFavorite(property.id, { forceRemove: true });
     });
+    actions.appendChild(removeButton);
+  }
+
+  content.appendChild(actions);
+  card.appendChild(content);
+
+  card.addEventListener("click", () => openPropertyModal(property));
+
+  return card;
 }
 
-// Create listing card
-function createListingCard(listing) {
-    const card = document.createElement('div');
-    card.className = 'listing-card';
-    
-    const roomTypeLabels = {
-        'shared': 'Shared Room',
-        'private': 'Private Room',
-        'studio': 'Studio',
-        'apartment': 'Apartment'
-    };
-    
-    card.innerHTML = `
-        <div style="position: relative;">
-            <img src="${listing.image}" alt="${listing.title}" class="listing-image" onerror="this.src='https://via.placeholder.com/400x300?text=Property+Image'">
-            ${listing.verified ? '<span class="listing-badge">✓ Verified</span>' : ''}
-            ${listing.has3DTour ? '<span class="listing-badge listing-3d-badge" style="top: 3.5rem;">3D Tour</span>' : ''}
-        </div>
-        <div class="listing-content">
-            <div class="listing-header">
-                <div>
-                    <h3 class="listing-title">${listing.title}</h3>
-                    <p class="listing-location">
-                        <i class="fas fa-map-marker-alt"></i> ${listing.location}
-                    </p>
-                </div>
-            </div>
-            <div class="listing-details">
-                <span><i class="fas fa-bed"></i> ${roomTypeLabels[listing.roomType]}</span>
-            </div>
-            <div class="listing-price">
-                <div class="price-main">₵${listing.rent.toLocaleString()}/month</div>
-                <div class="price-advance">6-month advance: ₵${listing.advance.toLocaleString()}</div>
-            </div>
-            <div class="listing-actions">
-                <button class="btn btn-primary" onclick="openViewingModal(${listing.id})">
-                    <i class="fas fa-calendar-check"></i> Request Viewing
-                </button>
-                ${listing.has3DTour ? `<button class="btn btn-secondary" onclick="open3DModal(${listing.id})">
-                    <i class="fas fa-cube"></i> 3D Tour
-                </button>` : ''}
-            </div>
-        </div>
-    `;
-    
-    return card;
+function renderProperties(list = properties, target = listingGrid, options = {}) {
+  if (!target) return;
+  target.innerHTML = "";
+  if (!list.length) {
+    const emptyState = document.createElement("p");
+    emptyState.textContent =
+      "No properties found for the selected filters. Try adjusting your budget or payment plan.";
+    target.appendChild(emptyState);
+    return;
+  }
+  list.forEach((property) => {
+    target.appendChild(createPropertyCard(property, options));
+  });
 }
 
-// Setup filters
-function setupFilters() {
-    const budgetFilter = document.getElementById('budget-filter');
-    const locationFilter = document.getElementById('location-filter');
-    const roomTypeFilter = document.getElementById('room-type-filter');
-    
-    [budgetFilter, locationFilter, roomTypeFilter].forEach(filter => {
-        if (filter) {
-            filter.addEventListener('change', applyFilters);
-        }
-    });
+function renderSavedProperties() {
+  if (!savedGrid) return;
+  const savedList = savedPropertyIds
+    .map((id) => properties.find((property) => property.id === id))
+    .filter(Boolean);
+  if (!savedList.length) {
+    savedGrid.innerHTML =
+      "<p class=\"empty-state\">You have no saved homes yet. Tap the ☆ Save button on any property to create your shortlist.</p>";
+    return;
+  }
+  renderProperties(savedList, savedGrid, { showRemove: true });
 }
 
-// Apply filters
+function resetForm(form) {
+  form.reset();
+  const firstField = form.querySelector("input, select, textarea");
+  if (firstField) {
+    firstField.focus();
+  }
+}
+
+function handlePropertySubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(propertyForm);
+  const newProperty = {
+    id: crypto.randomUUID(),
+    title: formData.get("title").trim(),
+    location: formData.get("location").trim(),
+    price: Number(formData.get("price")),
+    paymentFlexibility: formData.get("paymentFlexibility"),
+    bedrooms: Number(formData.get("bedrooms")) || null,
+    bathrooms: Number(formData.get("bathrooms")) || null,
+    area: Number(formData.get("area")) || null,
+    description: formData.get("description").trim(),
+    image: formData.get("image").trim(),
+    tour: formData.get("tour").trim(),
+  };
+
+  properties = [newProperty, ...properties];
+  saveProperties();
+  renderWithActiveFilters();
+  renderSavedProperties();
+  resetForm(propertyForm);
+
+  const submitButton = propertyForm.querySelector("button[type='submit']");
+  if (submitButton) {
+    submitButton.textContent = "Published!";
+    submitButton.disabled = true;
+    setTimeout(() => {
+      submitButton.textContent = "Publish property";
+      submitButton.disabled = false;
+    }, 2000);
+  }
+}
+
+function getFilteredProperties() {
+  if (!listingGrid) return [];
+  const budgetValue = Number(budgetFilter?.value);
+  const flexibilityValue = flexibilityFilter?.value || "Any";
+
+  return properties.filter((property) => {
+    const matchesBudget = budgetValue ? property.price <= budgetValue : true;
+    const matchesFlexibility =
+      flexibilityValue === "Any" ||
+      property.paymentFlexibility === flexibilityValue;
+    return matchesBudget && matchesFlexibility;
+  });
+}
+
+function renderWithActiveFilters() {
+  if (!listingGrid) return;
+  const filtered = getFilteredProperties();
+  renderProperties(filtered);
+}
+
 function applyFilters() {
-    const budgetFilter = document.getElementById('budget-filter').value;
-    const locationFilter = document.getElementById('location-filter').value;
-    const roomTypeFilter = document.getElementById('room-type-filter').value;
-    
-    filteredListings = sampleListings.filter(listing => {
-        // Budget filter
-        if (budgetFilter) {
-            const [min, max] = budgetFilter.split('-').map(v => v === '+' ? Infinity : parseInt(v));
-            if (budgetFilter.includes('+')) {
-                if (listing.rent < min) return false;
-            } else {
-                if (listing.rent < min || listing.rent > max) return false;
-            }
-        }
-        
-        // Location filter
-        if (locationFilter) {
-            const locationMap = {
-                'accra': 'Accra',
-                'kumasi': 'Kumasi',
-                'tema': 'Tema',
-                'takoradi': 'Takoradi',
-                'cape-coast': 'Cape Coast'
-            };
-            if (!listing.location.toLowerCase().includes(locationMap[locationFilter].toLowerCase())) {
-                return false;
-            }
-        }
-        
-        // Room type filter
-        if (roomTypeFilter && listing.roomType !== roomTypeFilter) {
-            return false;
-        }
-        
-        return true;
-    });
-    
-    renderListings();
+  if (!listingGrid) return;
+  renderWithActiveFilters();
 }
 
-// Reset filters
 function resetFilters() {
-    document.getElementById('budget-filter').value = '';
-    document.getElementById('location-filter').value = '';
-    document.getElementById('room-type-filter').value = '';
-    filteredListings = [...sampleListings];
-    renderListings();
+  if (!listingGrid) return;
+  if (budgetFilter) budgetFilter.value = "";
+  if (flexibilityFilter) flexibilityFilter.value = "Any";
+  renderWithActiveFilters();
 }
 
-// Viewing Request Modal
-function openViewingModal(propertyId) {
-    const modal = document.getElementById('viewing-modal');
-    const propertyIdInput = document.getElementById('property-id');
-    if (modal && propertyIdInput) {
-        propertyIdInput.value = propertyId;
-        modal.style.display = 'block';
+function calculateAffordability({ income, household = 1, neighborhood = "" }) {
+  if (!income || income <= 0) {
+    return null;
+  }
+
+  const sanitizedHousehold = household > 0 ? household : 1;
+  const recommendedRatio = 0.35;
+  const stretchRatio = 0.45;
+
+  const recommendedRent = Math.round((income * recommendedRatio) / 50) * 50;
+  const stretchRent = Math.round((income * stretchRatio) / 50) * 50;
+  const suggestedPlan = income < 4000 ? "Monthly" : "Monthly or Quarterly";
+  const affordabilityPercent = ((recommendedRent / income) * 100).toFixed(1);
+
+  const safeWidth = stretchRent
+    ? Math.min(Math.max((recommendedRent / stretchRent) * 100, 8), 100).toFixed(1)
+    : 0;
+  const cursorPercent = stretchRent
+    ? Math.min(Math.max((recommendedRent / stretchRent) * 100, 6), 96).toFixed(1)
+    : 0;
+
+  const matchingProperties = properties
+    .filter((property) => property.price <= stretchRent)
+    .slice(0, 3);
+
+  return {
+    income,
+    household: sanitizedHousehold,
+    neighborhood,
+    recommendedRent,
+    stretchRent,
+    suggestedPlan,
+    affordabilityPercent,
+    safeWidth,
+    cursorPercent,
+    matchingProperties,
+  };
+}
+
+function renderCalculatorSummary(target, data, options = {}) {
+  if (!target) return;
+
+  const placeholderMessage =
+    options.placeholderMessage ||
+    "Enter your income to discover a realistic monthly rent and matched homes.";
+
+  if (!data) {
+    target.innerHTML = `
+      <div class="calc-placeholder">
+        <p class="summary-eyebrow">Estimated rent budget</p>
+        <p class="calc-empty-copy">${placeholderMessage}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const matchesMarkup = data.matchingProperties
+    .map((property) => {
+      const town = property.location.split(",")[0];
+      return `
+        <div class="summary-listing">
+          <span class="listing-pill">${town}</span>
+          <div>
+            <strong>${property.title}</strong>
+            <p>${formatCurrency(property.price)} &bull; ${property.paymentFlexibility}</p>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  target.innerHTML = `
+    <div class="calculator-preview__summary calc-live-summary">
+      <p class="summary-eyebrow">Estimated rent budget</p>
+      <p class="summary-figure">${formatCurrency(data.recommendedRent)}<span>/mo</span></p>
+      <p class="calc-subtext">≈ ${data.affordabilityPercent}% of take-home pay</p>
+      <div class="summary-meter">
+        <span class="summary-meter__bar summary-meter__bar--stretch" style="width:100%"></span>
+        <span class="summary-meter__bar summary-meter__bar--safe" style="width:${data.safeWidth}%"></span>
+        <span class="summary-meter__cursor" style="left:${data.cursorPercent}%"></span>
+      </div>
+      <ul class="calc-stats">
+        <li><span>Suggested plan</span><strong>${data.suggestedPlan}</strong></li>
+        <li><span>Stretch ceiling</span><strong>${formatCurrency(data.stretchRent)}</strong></li>
+        <li><span>Household size</span><strong>${data.household}</strong></li>
+      </ul>
+      <p class="summary-subhead">Matched homes</p>
+      ${
+        data.matchingProperties.length
+          ? `<div class="calc-matches">${matchesMarkup}</div>`
+          : `<p class="summary-empty">No homes match yet — share your preferences so we can alert you the moment new listings go live.</p>`
+      }
+      ${
+        data.neighborhood
+          ? `<p class="calc-subtext">Tip: we’ll prioritise homes around <strong>${data.neighborhood}</strong> when new listings arrive.</p>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function setupCalculatorForm(formElement, resultContainer, options = {}) {
+  if (!formElement || !resultContainer) return;
+
+  const { defaults, onResult, placeholderMessage, syncOnInit = true } = options;
+
+  if (defaults) {
+    if (defaults.income != null && formElement.elements["income"]) {
+      formElement.elements["income"].value = defaults.income;
     }
-}
-
-function closeViewingModal() {
-    const modal = document.getElementById('viewing-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.getElementById('viewing-request-form').reset();
+    if (defaults.household != null && formElement.elements["household"]) {
+      formElement.elements["household"].value = defaults.household;
     }
-}
+    if (defaults.neighborhood != null && formElement.elements["neighborhood"]) {
+      formElement.elements["neighborhood"].value = defaults.neighborhood;
+    }
+  }
 
-// Submit viewing request
-function submitViewingRequest(event) {
+  const initialData = defaults
+    ? calculateAffordability({
+        income: Number(defaults.income),
+        household: Number(defaults.household) || 1,
+        neighborhood: defaults.neighborhood?.trim() || "",
+      })
+    : null;
+
+  if (initialData) {
+    renderCalculatorSummary(resultContainer, initialData, { placeholderMessage });
+    if (syncOnInit) {
+      onResult?.(initialData);
+    }
+  } else {
+    renderCalculatorSummary(resultContainer, null, { placeholderMessage });
+  }
+
+  formElement.addEventListener("submit", (event) => {
     event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const data = {
-        propertyId: formData.get('property-id'),
-        name: formData.get('name'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
-        preferredDate: formData.get('preferred-date'),
-        message: formData.get('message')
-    };
-    
-    // In production, this would send to backend/Google Sheets
-    console.log('Viewing Request:', data);
-    
-    // Simulate sending to WhatsApp/backend
-    const whatsappMessage = `New Viewing Request:\n\nProperty ID: ${data.propertyId}\nName: ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\nPreferred Date: ${data.preferredDate || 'Not specified'}\nMessage: ${data.message || 'None'}`;
-    const whatsappUrl = `https://wa.me/233XXXXXXXXX?text=${encodeURIComponent(whatsappMessage)}`;
-    
-    // Show success message
-    alert('Viewing request submitted! Our team will contact you via WhatsApp shortly.');
-    closeViewingModal();
-    
-    // In production, you would:
-    // 1. Send data to Google Sheets via Apps Script API
-    // 2. Send WhatsApp notification to Rent4Less team
-    // 3. Send confirmation to tenant
+    const formData = new FormData(formElement);
+    const income = Number(formData.get("income"));
+    const household = Number(formData.get("household")) || 1;
+    const neighborhood = formData.get("neighborhood")?.trim();
+
+    const data = calculateAffordability({ income, household, neighborhood });
+    if (!data) {
+      renderCalculatorSummary(resultContainer, null, { placeholderMessage });
+      return;
+    }
+
+    renderCalculatorSummary(resultContainer, data, { placeholderMessage });
+    onResult?.(data);
+  });
 }
 
-// 3D Tour Modal
-function open3DModal(propertyId) {
-    const modal = document.getElementById('3d-modal');
-    const viewer = document.getElementById('3d-viewer');
-    const title = document.getElementById('3d-property-title');
-    
-    if (modal && viewer) {
-        const listing = sampleListings.find(l => l.id === propertyId);
-        if (listing) {
-            title.textContent = `${listing.title} - 3D Virtual Tour`;
-            
-            // In production, this would load an actual 3D tour (e.g., Matterport, 3D Tour, etc.)
-            viewer.innerHTML = `
-                <div class="3d-placeholder">
-                    <i class="fas fa-cube"></i>
-                    <p>3D Tour Loading...</p>
-                    <p class="3d-note">Experience the property in 360° before you visit</p>
-                    <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);">
-                        In production, this would embed a 3D tour viewer (Matterport, 3D Tour, etc.)
-                    </p>
-                </div>
-            `;
-        }
-        modal.style.display = 'block';
-    }
-}
+function setupModals() {
+  const triggers = document.querySelectorAll("[data-modal-target]");
+  const closeButtons = document.querySelectorAll("[data-close]");
 
-function close3DModal() {
-    const modal = document.getElementById('3d-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Close modals when clicking outside
-window.onclick = function(event) {
-    const viewingModal = document.getElementById('viewing-modal');
-    const modal3D = document.getElementById('3d-modal');
-    const successModal = document.getElementById('success-modal');
-    
-    if (event.target === viewingModal) {
-        closeViewingModal();
-    }
-    if (event.target === modal3D) {
-        close3DModal();
-    }
-    if (event.target === successModal) {
-        closeSuccessModal();
-    }
-}
-
-// Landlord Form Functions
-function setupLandlordForm() {
-    const rentPriceInput = document.getElementById('rent-price');
-    const advancePaymentInput = document.getElementById('advance-payment');
-    
-    if (rentPriceInput && advancePaymentInput) {
-        rentPriceInput.addEventListener('input', function() {
-            const rent = parseFloat(this.value) || 0;
-            advancePaymentInput.value = (rent * 6).toLocaleString();
-        });
-    }
-}
-
-function toggle3DTourOption() {
-    const checkbox = document.getElementById('has-3d-tour');
-    const details = document.getElementById('3d-tour-details');
-    
-    if (checkbox && details) {
-        details.style.display = checkbox.checked ? 'block' : 'none';
-    }
-}
-
-function handleImageUpload(event) {
-    const files = Array.from(event.target.files);
-    const previewGrid = document.getElementById('image-preview-grid');
-    
-    if (!previewGrid) return;
-    
-    files.forEach(file => {
-        if (file.size > 5 * 1024 * 1024) {
-            alert(`File ${file.name} is too large. Maximum size is 5MB.`);
-            return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.createElement('div');
-            preview.className = 'image-preview';
-            preview.innerHTML = `
-                <img src="${e.target.result}" alt="Preview">
-                <button type="button" class="remove-image" onclick="removeImage(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            previewGrid.appendChild(preview);
-            uploadedImages.push({ file, preview });
-        };
-        reader.readAsDataURL(file);
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const modalId = trigger.getAttribute("data-modal-target");
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add("open");
+      }
     });
-}
+  });
 
-function removeImage(button) {
-    const preview = button.parentElement;
-    const index = Array.from(preview.parentElement.children).indexOf(preview);
-    uploadedImages.splice(index, 1);
-    preview.remove();
-}
+  closeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      button.closest(".modal")?.classList.remove("open");
+    });
+  });
 
-// Submit landlord form
-function submitLandlordForm(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const data = {
-        landlord: {
-            name: formData.get('landlord-name'),
-            phone: formData.get('landlord-phone'),
-            email: formData.get('landlord-email'),
-            ghanaCard: formData.get('ghana-card')
-        },
-        property: {
-            address: formData.get('property-address'),
-            location: formData.get('property-location'),
-            roomType: formData.get('room-type'),
-            rent: formData.get('rent-price'),
-            advance: formData.get('advance-payment'),
-            description: formData.get('property-description'),
-            has3DTour: formData.get('has-3d-tour') === 'on',
-            tourLink: formData.get('3d-tour-link'),
-            requestProfessionalPhotos: formData.get('request-professional-photos') === 'on'
-        },
-        images: uploadedImages.map(img => img.file.name)
-    };
-    
-    // In production, this would:
-    // 1. Upload images to cloud storage (AWS S3, Cloudinary, etc.)
-    // 2. Send data to Google Sheets via Apps Script API
-    // 3. Send notification to Rent4Less team via WhatsApp/Email
-    // 4. Send confirmation to landlord
-    
-    console.log('Landlord Form Data:', data);
-    
-    // Show success modal
-    const successModal = document.getElementById('success-modal');
-    if (successModal) {
-        successModal.style.display = 'block';
+  document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("modal")) {
+      event.target.classList.remove("open");
     }
-    
-    // Reset form
-    event.target.reset();
-    uploadedImages = [];
-    document.getElementById('image-preview-grid').innerHTML = '';
+  });
 }
 
-function closeSuccessModal() {
-    const modal = document.getElementById('success-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        window.location.href = 'index.html';
-    }
+function openPropertyModal(property) {
+  if (!propertyModal || !propertyModalContent) return;
+  const isSaved = savedPropertyIds.includes(property.id);
+  propertyModalContent.innerHTML = `
+    <div class="modal-body">
+      <div class="modal-media">
+        <img src="${
+          property.image ||
+          "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981545/rent4less-placeholder.jpg"
+        }" alt="${property.title}" />
+      </div>
+      <div class="modal-info">
+        <h3>${property.title}</h3>
+        <p>${property.location}</p>
+        <div class="modal-meta">
+          <span>💰 ${formatCurrency(property.price)} / month</span>
+          ${
+            property.bedrooms
+              ? `<span>🛏 ${property.bedrooms} bed${
+                  property.bedrooms > 1 ? "s" : ""
+                }</span>`
+              : ""
+          }
+          ${
+            property.bathrooms
+              ? `<span>🛁 ${property.bathrooms} bath${
+                  property.bathrooms > 1 ? "s" : ""
+                }</span>`
+              : ""
+          }
+          ${
+            property.area
+              ? `<span>📐 ${property.area} m²</span>`
+              : ""
+          }
+        </div>
+        <p>${property.description}</p>
+        <div class="modal-actions">
+          <button class="button" data-favorite-modal="${
+            property.id
+          }">${isSaved ? "★ Saved" : "☆ Save home"}</button>
+          <button class="button button-primary" data-request-viewing="${
+            property.id
+          }">Request Viewing</button>
+          ${
+            property.tour
+              ? `<a class="button button-ghost" target="_blank" rel="noopener" href="${property.tour}">Open 3D tour</a>`
+              : `<a class="button button-ghost" href="tenant-tools.html">Request a 3D tour</a>`
+          }
+        </div>
+        <div>
+          <h5>Landlord assurance</h5>
+          <ul>
+            <li>Tenant reputation score tracking after every lease cycle.</li>
+            <li>Optional payroll deduction through verified employers.</li>
+            <li>Escrow protection from partnering banks &amp; fintechs.</li>
+          </ul>
+        </div>
+        ${
+          property.tour
+            ? `<iframe src="${property.tour}" title="3D tour for ${property.title}" allow="xr-spatial-tracking; gyroscope; accelerometer"></iframe>`
+            : ""
+        }
+      </div>
+    </div>
+  `;
+  propertyModal.classList.add("open");
+
+  const modalFavorite = propertyModalContent.querySelector(
+    "[data-favorite-modal]"
+  );
+  modalFavorite?.addEventListener("click", () => {
+    toggleFavorite(property.id);
+  });
+
+  const requestViewingBtn = propertyModalContent.querySelector(
+    "[data-request-viewing]"
+  );
+  requestViewingBtn?.addEventListener("click", () => {
+    openViewingRequestModal(property.id);
+  });
 }
+
+function openViewingRequestModal(propertyId) {
+  const viewingModal = document.getElementById("viewingRequestModal");
+  const viewingForm = document.getElementById("viewingRequestForm");
+  const propertyIdInput = document.getElementById("viewingPropertyId");
+  
+  if (!viewingModal || !viewingForm || !propertyIdInput) return;
+  
+  propertyIdInput.value = propertyId;
+  viewingModal.classList.add("open");
+  
+  // Close property modal when opening viewing request
+  if (propertyModal) {
+    propertyModal.classList.remove("open");
+  }
+}
+
+function handleViewingRequestSubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const propertyId = formData.get("propertyId");
+  const property = properties.find(p => p.id === propertyId);
+  
+  const data = {
+    propertyId,
+    propertyTitle: property?.title || "Unknown Property",
+    name: formData.get("name"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    preferredDate: formData.get("preferredDate"),
+    message: formData.get("message")
+  };
+  
+  // In production, this would send to Google Sheets/backend
+  console.log("Viewing Request:", data);
+  
+  // Create WhatsApp message
+  const whatsappMessage = `New Viewing Request:\n\nProperty: ${data.propertyTitle}\nName: ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email || "Not provided"}\nPreferred Date: ${data.preferredDate || "Not specified"}\nMessage: ${data.message || "None"}`;
+  const whatsappUrl = `https://wa.me/233XXXXXXXXX?text=${encodeURIComponent(whatsappMessage)}`;
+  
+  // Show success and open WhatsApp
+  alert("Viewing request submitted! Our team will contact you via WhatsApp shortly.");
+  window.open(whatsappUrl, "_blank");
+  
+  // Close modal and reset form
+  const viewingModal = document.getElementById("viewingRequestModal");
+  if (viewingModal) {
+    viewingModal.classList.remove("open");
+  }
+  event.target.reset();
+}
+
+function toggleFavorite(propertyId, options = {}) {
+  const { forceRemove = false } = options;
+  const isSaved = savedPropertyIds.includes(propertyId);
+  if (isSaved || forceRemove) {
+    savedPropertyIds = savedPropertyIds.filter((id) => id !== propertyId);
+  } else {
+    savedPropertyIds = [propertyId, ...savedPropertyIds];
+  }
+  persistSavedProperties();
+  renderWithActiveFilters();
+  renderSavedProperties();
+
+  if (propertyModal?.classList.contains("open")) {
+    const property = properties.find((item) => item.id === propertyId);
+    if (property) {
+      openPropertyModal(property);
+    }
+  }
+}
+
+function init() {
+  renderWithActiveFilters();
+  renderSavedProperties();
+  setupModals();
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+  }
+
+  const calculatorPlaceholder =
+    "Enter your income to discover a realistic monthly rent and matched homes.";
+
+  setupCalculatorForm(calculatorForm, calculatorResult, {
+    placeholderMessage: calculatorPlaceholder,
+  });
+
+  setupCalculatorForm(heroCalculatorForm, heroCalculatorResult, {
+    defaults: { income: 7500, household: 3, neighborhood: "East Legon" },
+    placeholderMessage: calculatorPlaceholder,
+    syncOnInit: false,
+    onResult: (data) => {
+      renderCalculatorSummary(calculatorResult, data, {
+        placeholderMessage: calculatorPlaceholder,
+      });
+      if (calculatorForm) {
+        if (calculatorForm.elements["income"]) {
+          calculatorForm.elements["income"].value = data.income;
+        }
+        if (calculatorForm.elements["household"]) {
+          calculatorForm.elements["household"].value = data.household;
+        }
+        if (calculatorForm.elements["neighborhood"]) {
+          calculatorForm.elements["neighborhood"].value = data.neighborhood || "";
+        }
+      }
+    },
+  });
+}
+
+propertyForm?.addEventListener("submit", handlePropertySubmit);
+applyFiltersButton?.addEventListener("click", applyFilters);
+resetFiltersButton?.addEventListener("click", resetFilters);
+
+const viewingRequestForm = document.getElementById("viewingRequestForm");
+viewingRequestForm?.addEventListener("submit", handleViewingRequestSubmit);
+
+document.addEventListener("DOMContentLoaded", init);
+
