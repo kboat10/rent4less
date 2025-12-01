@@ -31,7 +31,7 @@ const EMBEDDED_LISTINGS_DATA = {
       "bathrooms": 2,
       "area": 95,
       "description": "Furnished apartment with backup power, Wi-Fi, and proximity to business hubs. Employer-backed payment guaranteed. Modern kitchen, spacious living area, and secure compound.",
-      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
       "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
       "verified": true,
       "landlordName": "Kwame Asante",
@@ -67,8 +67,8 @@ const EMBEDDED_LISTINGS_DATA = {
       "bathrooms": 3,
       "area": 140,
       "description": "Spacious home with private compound and community security. Tenant reputation score of previous tenant: 4.8/5. Perfect for families with children.",
-      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
-      "tour": "",
+      "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
+      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
       "verified": true,
       "landlordName": "Kofi Boateng",
       "landlordPhone": "+233 XX XXX XXXX",
@@ -176,7 +176,7 @@ const EMBEDDED_LISTINGS_DATA = {
       "area": 65,
       "description": "Modern apartment with contemporary finishes. Close to shopping malls and business areas. Secure compound with parking. Ideal for professionals.",
       "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
-      "tour": "",
+      "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
       "verified": true,
       "landlordName": "Kwabena Osei",
       "landlordPhone": "+233 XX XXX XXXX",
@@ -230,7 +230,7 @@ const EMBEDDED_LISTINGS_DATA = {
       "area": 45,
       "description": "Compact studio in the heart of Osu. Walking distance to restaurants, shops, and nightlife. Perfect for young professionals seeking vibrant area.",
       "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
-      "tour": "",
+      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
       "verified": true,
       "landlordName": "Adjoa Mensah",
       "landlordPhone": "+233 XX XXX XXXX",
@@ -301,24 +301,28 @@ async function loadPropertiesFromJSON() {
     if (response.ok) {
       const data = await response.json();
       if (data.listings && Array.isArray(data.listings) && data.listings.length > 0) {
-        console.log(`Loaded ${data.listings.length} listings from JSON file`);
+        console.log(`✅ Loaded ${data.listings.length} listings from JSON file`);
         return data.listings.map(listing => ({
           ...listing,
           id: listing.id || crypto.randomUUID()
         }));
+      } else {
+        console.warn("JSON file loaded but no listings found, using embedded data");
       }
+    } else {
+      console.warn(`JSON file fetch returned status ${response.status}, using embedded data`);
     }
   } catch (error) {
-    console.log("JSON file not available, using embedded data:", error.message);
+    console.warn("JSON file not available, using embedded data:", error.message);
   }
   
   // Fallback to embedded data if JSON file is not available
-  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings) {
+  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
     const listings = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
       ...listing,
       id: listing.id || crypto.randomUUID()
     }));
-    console.log(`Loaded ${listings.length} listings from embedded data (fallback)`);
+    console.log(`✅ Loaded ${listings.length} listings from embedded data (fallback)`);
     return listings;
   }
   
@@ -874,7 +878,7 @@ function handlePropertySubmit(event) {
 function getFilteredProperties() {
   // Ensure properties array is available
   if (!properties || properties.length === 0) {
-    console.warn("Properties array is empty. Waiting for data to load...");
+    console.warn("⚠️ Properties array is empty. Waiting for data to load...");
     return [];
   }
   
@@ -908,9 +912,13 @@ function getFilteredProperties() {
 
 function renderWithActiveFilters() {
   const listingGridEl = document.getElementById("listingGrid");
-  if (!listingGridEl) return;
+  if (!listingGridEl) {
+    console.warn("⚠️ listingGrid element not found");
+    return;
+  }
   
   const filtered = getFilteredProperties();
+  console.log(`🔄 Rendering ${filtered.length} filtered properties out of ${properties.length} total`);
   renderProperties(filtered, listingGridEl);
   
   // Update count display
@@ -1422,14 +1430,15 @@ async function init() {
   
   try {
     // Load properties from JSON file
+    console.log("🔄 Starting to load properties...");
     properties = await loadProperties();
     
     // Log for debugging
-    console.log(`Loaded ${properties.length} properties`);
-    console.log(`Properties with 3D tours: ${properties.filter(p => p.tour).length}`);
+    console.log(`✅ Total properties loaded: ${properties.length}`);
+    console.log(`✅ Properties with 3D tours: ${properties.filter(p => p.tour && p.tour.trim() !== "").length}`);
     
-    if (properties.length === 0) {
-      console.error("No properties loaded! Check JSON file path and content.");
+    if (!properties || properties.length === 0) {
+      console.error("❌ No properties loaded! Check JSON file path and content.");
       if (listingGridEl) {
         listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p></div>';
       }
@@ -1437,10 +1446,12 @@ async function init() {
     }
     
     // Render properties on listings page
+    console.log("🔄 Rendering properties...");
     renderWithActiveFilters();
     renderSavedProperties();
+    console.log("✅ Properties rendered successfully");
   } catch (error) {
-    console.error("Error initializing:", error);
+    console.error("❌ Error initializing:", error);
     if (listingGridEl) {
       listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
     }
