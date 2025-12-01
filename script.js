@@ -626,6 +626,9 @@ let savedPropertyIds = loadSavedProperties();
       id: listing.id || crypto.randomUUID()
     }));
     console.log(`✅ Pre-loaded ${properties.length} properties from embedded data (immediate fallback)`);
+    console.log(`✅ Properties array now exists:`, typeof properties !== 'undefined', 'Length:', properties.length);
+  } else {
+    console.error("❌ EMBEDDED_LISTINGS_DATA not found or invalid!");
   }
 })();
 
@@ -1619,7 +1622,4 @@ if (document.readyState === 'loading') {
 } else {
   // DOM is already ready, run immediately
   init();
-}
-
-
 }
