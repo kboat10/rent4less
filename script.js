@@ -615,7 +615,8 @@ async function loadProperties() {
   return [...jsonProperties, ...userAddedProperties];
 }
 
-let properties = [];
+// Global properties array - must be accessible everywhere
+var properties = [];
 let savedPropertyIds = loadSavedProperties();
 
 // IMMEDIATE FALLBACK: Pre-load embedded data to ensure properties are always available
