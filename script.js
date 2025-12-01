@@ -16,6 +16,8 @@ const propertyForm = document.getElementById("propertyForm");
 const listingGrid = document.getElementById("listingGrid");
 const savedGrid = document.getElementById("savedGrid");
 const budgetFilter = document.getElementById("budgetFilter");
+const locationFilter = document.getElementById("locationFilter");
+const roomTypeFilter = document.getElementById("roomTypeFilter");
 const flexibilityFilter = document.getElementById("flexibilityFilter");
 const applyFiltersButton = document.getElementById("applyFilters");
 const resetFiltersButton = document.getElementById("resetFilters");
@@ -543,7 +545,12 @@ function renderProperties(list = null, target = null, options = {}) {
   const propertiesToRender = (list && list.length > 0) ? list : properties;
   
   if (!propertiesToRender || propertiesToRender.length === 0) {
-    target.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>No properties found.</p></div>';
+    target.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>No properties found matching your filters. Try adjusting your search criteria.</p></div>';
+    // Update count to 0
+    const countElement = document.getElementById("listingsCountNumber");
+    if (countElement) {
+      countElement.textContent = "0";
+    }
     return;
   }
   
@@ -557,6 +564,14 @@ function renderProperties(list = null, target = null, options = {}) {
       console.error("Error creating card:", error);
     }
   });
+  
+  // Update count if this is the main listing grid (not saved properties)
+  if (target.id === "listingGrid") {
+    const countElement = document.getElementById("listingsCountNumber");
+    if (countElement) {
+      countElement.textContent = propertiesToRender.length;
+    }
+  }
 }
 
 function getFilteredProperties() {
@@ -564,14 +579,36 @@ function getFilteredProperties() {
   
   let filtered = [...properties];
   
+  // Budget filter
   const budgetValue = budgetFilter?.value;
-  if (budgetValue && budgetValue !== "all") {
+  if (budgetValue && budgetValue !== "" && budgetValue !== "all") {
     const maxBudget = parseInt(budgetValue);
-    filtered = filtered.filter(p => p.price <= maxBudget);
+    if (!isNaN(maxBudget) && maxBudget > 0) {
+      filtered = filtered.filter(p => p.price <= maxBudget);
+    }
   }
   
+  // Location filter
+  const locationValue = locationFilter?.value;
+  if (locationValue && locationValue !== "Any" && locationValue !== "all") {
+    filtered = filtered.filter(p => {
+      const location = p.location?.toLowerCase() || "";
+      return location.includes(locationValue.toLowerCase());
+    });
+  }
+  
+  // Room type filter
+  const roomTypeValue = roomTypeFilter?.value;
+  if (roomTypeValue && roomTypeValue !== "Any" && roomTypeValue !== "all") {
+    filtered = filtered.filter(p => {
+      const roomType = p.roomType?.toLowerCase() || "";
+      return roomType === roomTypeValue.toLowerCase();
+    });
+  }
+  
+  // Payment flexibility filter
   const flexibilityValue = flexibilityFilter?.value;
-  if (flexibilityValue && flexibilityValue !== "all") {
+  if (flexibilityValue && flexibilityValue !== "Any" && flexibilityValue !== "all") {
     filtered = filtered.filter(p => {
       const flex = p.paymentFlexibility?.toLowerCase() || "";
       return flex.includes(flexibilityValue.toLowerCase());
@@ -584,6 +621,12 @@ function getFilteredProperties() {
 function renderWithActiveFilters() {
   const filtered = getFilteredProperties();
   renderProperties(filtered);
+  
+  // Update listings count
+  const countElement = document.getElementById("listingsCountNumber");
+  if (countElement) {
+    countElement.textContent = filtered.length;
+  }
 }
 
 function renderSavedProperties() {
@@ -611,8 +654,10 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  if (budgetFilter) budgetFilter.value = "all";
-  if (flexibilityFilter) flexibilityFilter.value = "all";
+  if (budgetFilter) budgetFilter.value = "";
+  if (locationFilter) locationFilter.value = "Any";
+  if (roomTypeFilter) roomTypeFilter.value = "Any";
+  if (flexibilityFilter) flexibilityFilter.value = "Any";
   renderWithActiveFilters();
 }
 
@@ -986,6 +1031,27 @@ async function init() {
   }
   if (resetFiltersButton) {
     resetFiltersButton.addEventListener("click", resetFilters);
+  }
+  
+  // Live filtering on Enter key in budget input
+  if (budgetFilter) {
+    budgetFilter.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        applyFilters();
+      }
+    });
+  }
+  
+  // Live filtering on change for dropdowns (optional - can be removed if you prefer Apply button only)
+  if (locationFilter) {
+    locationFilter.addEventListener("change", applyFilters);
+  }
+  if (roomTypeFilter) {
+    roomTypeFilter.addEventListener("change", applyFilters);
+  }
+  if (flexibilityFilter) {
+    flexibilityFilter.addEventListener("change", applyFilters);
   }
   
   // Update year
