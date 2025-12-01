@@ -17,37 +17,315 @@ const STORAGE_KEY = "rent4less-properties";
 const FAVORITES_KEY = "rent4less-favorites";
 const LISTINGS_DATA_URL = "data/listings.json";
 
-// Load properties from JSON file
+// Embedded listings data (loaded from JSON file)
+const EMBEDDED_LISTINGS_DATA = {
+  "listings": [
+    {
+      "id": "prop-001",
+      "title": "Modern 2-Bed Apartment · East Legon",
+      "location": "East Legon, Accra",
+      "price": 3200,
+      "paymentFlexibility": "Monthly or Quarterly",
+      "roomType": "Apartment",
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "area": 95,
+      "description": "Furnished apartment with backup power, Wi-Fi, and proximity to business hubs. Employer-backed payment guaranteed. Modern kitchen, spacious living area, and secure compound.",
+      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+      "verified": true,
+      "landlordName": "Kwame Asante",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Backup Power", "Wi-Fi", "Security", "Parking", "Furnished"]
+    },
+    {
+      "id": "prop-002",
+      "title": "Studio Loft · Osu",
+      "location": "Osu, Accra",
+      "price": 1800,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Studio",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 52,
+      "description": "Bright loft with 3D Smart Tour available. Ideal for young professionals who want nightlife and short commutes. Modern finishes, high ceilings, and natural light.",
+      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+      "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
+      "verified": true,
+      "landlordName": "Ama Mensah",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Wi-Fi", "Furnished", "Security", "High Ceilings"]
+    },
+    {
+      "id": "prop-003",
+      "title": "Family Home · Tema Community 10",
+      "location": "Tema Community 10",
+      "price": 2500,
+      "paymentFlexibility": "Quarterly",
+      "roomType": "Apartment",
+      "bedrooms": 3,
+      "bathrooms": 3,
+      "area": 140,
+      "description": "Spacious home with private compound and community security. Tenant reputation score of previous tenant: 4.8/5. Perfect for families with children.",
+      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Kofi Boateng",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Compound", "Security", "Parking", "3 Bedrooms", "Family-Friendly"]
+    },
+    {
+      "id": "prop-004",
+      "title": "Cozy Shared Room · Adum",
+      "location": "Adum, Kumasi",
+      "price": 450,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Shared",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 25,
+      "description": "Comfortable shared room in a safe, well-maintained house. Perfect for students or young professionals. Utilities included. Clean, modern shared spaces.",
+      "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Yaa Owusu",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Utilities Included", "Wi-Fi", "Shared Kitchen", "Security"]
+    },
+    {
+      "id": "prop-005",
+      "title": "Private Room with Ensuite · Airport Residential",
+      "location": "Airport Residential, Accra",
+      "price": 1200,
+      "paymentFlexibility": "Monthly or Quarterly",
+      "roomType": "Private",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 35,
+      "description": "Private room with ensuite bathroom in a modern house. Shared kitchen and living area. Close to airport and business district. Ideal for professionals.",
+      "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Nana Adjei",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Ensuite Bathroom", "Wi-Fi", "Shared Kitchen", "Security", "Parking"]
+    },
+    {
+      "id": "prop-006",
+      "title": "Luxury 3-Bed Apartment · Cantonments",
+      "location": "Cantonments, Accra",
+      "price": 4500,
+      "paymentFlexibility": "Quarterly",
+      "roomType": "Apartment",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "area": 180,
+      "description": "Premium furnished apartment with modern amenities, security, and backup power. Ideal for families or executives. High-end finishes throughout.",
+      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+      "verified": true,
+      "landlordName": "Efua Tetteh",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Backup Power", "Wi-Fi", "Security", "Parking", "Furnished", "AC", "Modern Kitchen"]
+    },
+    {
+      "id": "prop-007",
+      "title": "Affordable Studio · Labone",
+      "location": "Labone, Accra",
+      "price": 900,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Studio",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 40,
+      "description": "Budget-friendly studio apartment in a quiet neighborhood. Perfect for first-time renters. All utilities included. Safe and secure area.",
+      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Kojo Appiah",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Utilities Included", "Wi-Fi", "Security"]
+    },
+    {
+      "id": "prop-008",
+      "title": "Shared Room · University Area",
+      "location": "University Area, Cape Coast",
+      "price": 350,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Shared",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 20,
+      "description": "Student-friendly shared accommodation near university. Safe, affordable, and well-maintained. Perfect for students. Study-friendly environment.",
+      "image": "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Akosua Asiedu",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Utilities Included", "Wi-Fi", "Study Area", "Security"]
+    },
+    {
+      "id": "prop-009",
+      "title": "Modern 1-Bed Apartment · Spintex",
+      "location": "Spintex, Accra",
+      "price": 2000,
+      "paymentFlexibility": "Monthly or Quarterly",
+      "roomType": "Apartment",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 65,
+      "description": "Modern apartment with contemporary finishes. Close to shopping malls and business areas. Secure compound with parking. Ideal for professionals.",
+      "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Kwabena Osei",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Parking", "Wi-Fi", "Security", "Modern Finishes"]
+    },
+    {
+      "id": "prop-010",
+      "title": "Private Room · Takoradi",
+      "location": "Takoradi, Western Region",
+      "price": 600,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Private",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 30,
+      "description": "Private room in a family home. Shared kitchen and living space. Peaceful neighborhood with good security. Close to city center.",
+      "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Mariama Sule",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Shared Kitchen", "Wi-Fi", "Security"]
+    },
+    {
+      "id": "prop-011",
+      "title": "2-Bed Apartment · Dzorwulu",
+      "location": "Dzorwulu, Accra",
+      "price": 2800,
+      "paymentFlexibility": "Quarterly",
+      "roomType": "Apartment",
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "area": 110,
+      "description": "Spacious 2-bedroom apartment in a prime location. Fully furnished with modern appliances. Ideal for professionals or small families.",
+      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+      "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
+      "verified": true,
+      "landlordName": "David Ampofo",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Furnished", "Wi-Fi", "Security", "Parking", "Modern Appliances"]
+    },
+    {
+      "id": "prop-012",
+      "title": "Studio Apartment · Osu",
+      "location": "Osu, Accra",
+      "price": 1500,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Studio",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 45,
+      "description": "Compact studio in the heart of Osu. Walking distance to restaurants, shops, and nightlife. Perfect for young professionals seeking vibrant area.",
+      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Adjoa Mensah",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Wi-Fi", "Furnished", "Security", "Prime Location"]
+    },
+    {
+      "id": "prop-013",
+      "title": "Shared Room · East Legon",
+      "location": "East Legon, Accra",
+      "price": 500,
+      "paymentFlexibility": "Monthly",
+      "roomType": "Shared",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 22,
+      "description": "Affordable shared room in a well-located house. Close to universities and business areas. Utilities and Wi-Fi included. Clean and modern.",
+      "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Emmanuel Quaye",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Utilities Included", "Wi-Fi", "Security", "Shared Kitchen"]
+    },
+    {
+      "id": "prop-014",
+      "title": "Luxury Studio · Airport Ridge",
+      "location": "Airport Ridge, Takoradi",
+      "price": 1100,
+      "paymentFlexibility": "Monthly or Quarterly",
+      "roomType": "Studio",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "area": 50,
+      "description": "Modern studio apartment with premium finishes. Close to airport and business district. Secure compound with 24/7 security. Ideal for frequent travelers.",
+      "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
+      "tour": "",
+      "verified": true,
+      "landlordName": "Patience Asare",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["24/7 Security", "Wi-Fi", "Parking", "Premium Finishes", "AC"]
+    },
+    {
+      "id": "prop-015",
+      "title": "3-Bed Family Home · Tema",
+      "location": "Tema, Greater Accra",
+      "price": 3000,
+      "paymentFlexibility": "Quarterly",
+      "roomType": "Apartment",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "area": 150,
+      "description": "Spacious family home with large compound. Perfect for families. Close to schools, markets, and transport hubs. Safe neighborhood.",
+      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+      "verified": true,
+      "landlordName": "Samuel Adjei",
+      "landlordPhone": "+233 XX XXX XXXX",
+      "amenities": ["Large Compound", "Security", "Parking", "Family-Friendly", "Schools Nearby"]
+    }
+  ]
+};
+
+// Load properties from JSON file (with embedded fallback)
 async function loadPropertiesFromJSON() {
-  try {
-    console.log("Loading listings from:", LISTINGS_DATA_URL);
-    const response = await fetch(LISTINGS_DATA_URL);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log("JSON data loaded:", data);
-    
-    if (!data.listings || !Array.isArray(data.listings)) {
-      throw new Error("Invalid JSON structure: missing 'listings' array");
-    }
-    
-    const listings = data.listings.map(listing => ({
+  // First try to use embedded data (always available)
+  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings) {
+    const listings = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
       ...listing,
       id: listing.id || crypto.randomUUID()
     }));
+    console.log(`Loaded ${listings.length} listings from embedded data`);
     
-    console.log(`Successfully loaded ${listings.length} listings from JSON`);
+    // Also try to fetch from JSON file to update if available
+    try {
+      const response = await fetch(LISTINGS_DATA_URL);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.listings && Array.isArray(data.listings) && data.listings.length > 0) {
+          console.log(`Updated with ${data.listings.length} listings from JSON file`);
+          return data.listings.map(listing => ({
+            ...listing,
+            id: listing.id || crypto.randomUUID()
+          }));
+        }
+      }
+    } catch (error) {
+      console.log("JSON file not available, using embedded data:", error.message);
+    }
+    
     return listings;
-  } catch (error) {
-    console.error("Failed to load listings from JSON:", error);
-    console.warn("Falling back to default properties");
-    const defaults = getDefaultProperties();
-    console.log(`Using ${defaults.length} default properties`);
-    return defaults;
   }
+  
+  // Fallback to default properties if embedded data is missing
+  console.warn("Embedded data missing, using default properties");
+  return getDefaultProperties();
 }
 
 function getDefaultProperties() {
