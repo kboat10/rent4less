@@ -20,16 +20,33 @@ const LISTINGS_DATA_URL = "data/listings.json";
 // Load properties from JSON file
 async function loadPropertiesFromJSON() {
   try {
+    console.log("Loading listings from:", LISTINGS_DATA_URL);
     const response = await fetch(LISTINGS_DATA_URL);
-    if (!response.ok) throw new Error("Failed to load listings");
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
-    return data.listings.map(listing => ({
+    console.log("JSON data loaded:", data);
+    
+    if (!data.listings || !Array.isArray(data.listings)) {
+      throw new Error("Invalid JSON structure: missing 'listings' array");
+    }
+    
+    const listings = data.listings.map(listing => ({
       ...listing,
       id: listing.id || crypto.randomUUID()
     }));
+    
+    console.log(`Successfully loaded ${listings.length} listings from JSON`);
+    return listings;
   } catch (error) {
-    console.warn("Failed to load listings from JSON, using defaults:", error);
-    return getDefaultProperties();
+    console.error("Failed to load listings from JSON:", error);
+    console.warn("Falling back to default properties");
+    const defaults = getDefaultProperties();
+    console.log(`Using ${defaults.length} default properties`);
+    return defaults;
   }
 }
 
@@ -490,14 +507,22 @@ function createPropertyCard(property, options = {}) {
 function renderProperties(list = properties, target = listingGrid, options = {}) {
   if (!target) return;
   target.innerHTML = "";
-  if (!list.length) {
-    const emptyState = document.createElement("p");
-    emptyState.textContent =
-      "No properties found for the selected filters. Try adjusting your budget or payment plan.";
+  
+  // Use the provided list or fallback to properties array
+  const propertiesToRender = list.length > 0 ? list : properties;
+  
+  if (!propertiesToRender.length) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "empty-state";
+    emptyState.innerHTML = `
+      <p style="text-align: center; padding: 48px; color: var(--color-muted);">
+        No properties found for the selected filters. Try adjusting your budget or payment plan.
+      </p>
+    `;
     target.appendChild(emptyState);
     return;
   }
-  list.forEach((property) => {
+  propertiesToRender.forEach((property) => {
     target.appendChild(createPropertyCard(property, options));
   });
 }
@@ -561,6 +586,13 @@ function handlePropertySubmit(event) {
 
 function getFilteredProperties() {
   if (!listingGrid) return [];
+  
+  // Ensure properties array is available
+  if (!properties || properties.length === 0) {
+    console.warn("Properties array is empty. Waiting for data to load...");
+    return [];
+  }
+  
   const budgetValue = Number(budgetFilter?.value);
   const flexibilityValue = flexibilityFilter?.value || "Any";
   const locationFilter = document.getElementById("locationFilter");
@@ -1091,15 +1123,36 @@ function toggleFavorite(propertyId, options = {}) {
 }
 
 async function init() {
-  // Load properties from JSON file
-  properties = await loadProperties();
+  // Show loading state
+  if (listingGrid) {
+    listingGrid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
+  }
   
-  // Log for debugging
-  console.log(`Loaded ${properties.length} properties from JSON`);
-  console.log(`Properties with 3D tours: ${properties.filter(p => p.tour).length}`);
+  try {
+    // Load properties from JSON file
+    properties = await loadProperties();
+    
+    // Log for debugging
+    console.log(`Loaded ${properties.length} properties from JSON`);
+    console.log(`Properties with 3D tours: ${properties.filter(p => p.tour).length}`);
+    
+    if (properties.length === 0) {
+      console.error("No properties loaded! Check JSON file path and content.");
+      if (listingGrid) {
+        listingGrid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p></div>';
+      }
+      return;
+    }
+    
+    renderWithActiveFilters();
+    renderSavedProperties();
+  } catch (error) {
+    console.error("Error initializing:", error);
+    if (listingGrid) {
+      listingGrid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
+    }
+  }
   
-  renderWithActiveFilters();
-  renderSavedProperties();
   setupModals();
   if (yearSpan) {
     yearSpan.textContent = new Date().getFullYear();
