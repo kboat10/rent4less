@@ -606,6 +606,17 @@ async function loadProperties() {
 let properties = [];
 let savedPropertyIds = loadSavedProperties();
 
+// IMMEDIATE FALLBACK: Pre-load embedded data to ensure properties are always available
+(function preloadProperties() {
+  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
+    properties = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
+      ...listing,
+      id: listing.id || crypto.randomUUID()
+    }));
+    console.log(`✅ Pre-loaded ${properties.length} properties from embedded data (immediate fallback)`);
+  }
+})();
+
 function saveProperties() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(properties));
 }
@@ -660,7 +671,7 @@ function createPropertyCard(property, options = {}) {
   }
   
   // 3D Tour badge
-  if (property.tour) {
+  if (property.tour && property.tour.trim() !== "") {
     const tourBadge = document.createElement("span");
     tourBadge.style.cssText = "position: absolute; top: 18px; right: 18px; background: var(--color-primary); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);";
     tourBadge.textContent = "3D Tour";
@@ -785,17 +796,27 @@ function createPropertyCard(property, options = {}) {
   return card;
 }
 
-function renderProperties(list = properties, target = null, options = {}) {
+function renderProperties(list = null, target = null, options = {}) {
   // If no target provided, try to find listingGrid
   if (!target) {
     target = document.getElementById("listingGrid");
   }
-  if (!target) return;
+  if (!target) {
+    console.error("❌ Cannot render: listingGrid element not found");
+    return;
+  }
   
   target.innerHTML = "";
   
-  // Use the provided list or fallback to properties array
-  const propertiesToRender = list && list.length > 0 ? list : (properties && properties.length > 0 ? properties : []);
+  // Determine which list to use
+  let propertiesToRender = [];
+  if (list && Array.isArray(list) && list.length > 0) {
+    propertiesToRender = list;
+  } else if (properties && Array.isArray(properties) && properties.length > 0) {
+    propertiesToRender = properties;
+  } else {
+    console.warn("⚠️ No properties to render. List:", list, "Properties:", properties);
+  }
   
   if (!propertiesToRender.length) {
     const emptyState = document.createElement("div");
@@ -811,9 +832,19 @@ function renderProperties(list = properties, target = null, options = {}) {
     target.appendChild(emptyState);
     return;
   }
+  
+  console.log(`🔄 Rendering ${propertiesToRender.length} property cards...`);
   propertiesToRender.forEach((property) => {
-    target.appendChild(createPropertyCard(property, options));
+    try {
+      const card = createPropertyCard(property, options);
+      if (card) {
+        target.appendChild(card);
+      }
+    } catch (error) {
+      console.error("❌ Error creating property card:", error, property);
+    }
   });
+  console.log(`✅ Rendered ${propertiesToRender.length} property cards`);
 }
 
 function renderSavedProperties() {
@@ -917,8 +948,17 @@ function renderWithActiveFilters() {
     return;
   }
   
+  // Ensure properties array exists and has data
+  if (!properties || !Array.isArray(properties) || properties.length === 0) {
+    console.error("❌ Properties array is empty or invalid:", properties);
+    listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
+    return;
+  }
+  
   const filtered = getFilteredProperties();
   console.log(`🔄 Rendering ${filtered.length} filtered properties out of ${properties.length} total`);
+  
+  // Always render, even if filtered is empty (will show "no matches" message)
   renderProperties(filtered, listingGridEl);
   
   // Update count display
@@ -1428,19 +1468,36 @@ async function init() {
     listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
   }
   
+  // IMMEDIATE FALLBACK: Load embedded data first to ensure we always have properties
+  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
+    const embeddedListings = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
+      ...listing,
+      id: listing.id || crypto.randomUUID()
+    }));
+    console.log(`✅ Pre-loaded ${embeddedListings.length} listings from embedded data`);
+    properties = embeddedListings; // Set immediately as fallback
+  }
+  
   try {
-    // Load properties from JSON file
-    console.log("🔄 Starting to load properties...");
-    properties = await loadProperties();
+    // Load properties from JSON file (will override embedded if successful)
+    console.log("🔄 Starting to load properties from JSON...");
+    const loadedProperties = await loadProperties();
+    
+    if (loadedProperties && loadedProperties.length > 0) {
+      properties = loadedProperties;
+      console.log(`✅ Loaded ${properties.length} properties from JSON file`);
+    } else {
+      console.warn("⚠️ JSON file returned no properties, using embedded data");
+    }
     
     // Log for debugging
-    console.log(`✅ Total properties loaded: ${properties.length}`);
+    console.log(`✅ Total properties available: ${properties.length}`);
     console.log(`✅ Properties with 3D tours: ${properties.filter(p => p.tour && p.tour.trim() !== "").length}`);
     
     if (!properties || properties.length === 0) {
-      console.error("❌ No properties loaded! Check JSON file path and content.");
+      console.error("❌ CRITICAL: No properties available at all!");
       if (listingGridEl) {
-        listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p></div>';
+        listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error: No properties found. Please contact support.</p></div>';
       }
       return;
     }
@@ -1452,8 +1509,17 @@ async function init() {
     console.log("✅ Properties rendered successfully");
   } catch (error) {
     console.error("❌ Error initializing:", error);
-    if (listingGridEl) {
-      listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
+    console.error("Error details:", error.stack);
+    
+    // Even on error, try to render embedded data if available
+    if (properties && properties.length > 0) {
+      console.log("⚠️ Error occurred but using available properties");
+      renderWithActiveFilters();
+      renderSavedProperties();
+    } else {
+      if (listingGridEl) {
+        listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
+      }
     }
   }
   
@@ -1521,5 +1587,11 @@ document.querySelectorAll(".newsletter-form").forEach(form => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", init);
+// Initialize immediately when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  // DOM is already ready, run immediately
+  init();
+}
 
