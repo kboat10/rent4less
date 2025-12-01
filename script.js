@@ -724,12 +724,12 @@ function openPropertyModal(property) {
 function open3DTourModal(property) {
   if (!property || !property.tour) return;
   
-  const modal = document.getElementById("tourModal");
-  if (!modal) {
-    const newModal = document.createElement("div");
-    newModal.id = "tourModal";
-    newModal.className = "modal";
-    newModal.innerHTML = `
+  let tourModal = document.getElementById("tourModal");
+  if (!tourModal) {
+    tourModal = document.createElement("div");
+    tourModal.id = "tourModal";
+    tourModal.className = "modal";
+    tourModal.innerHTML = `
       <div class="modal-content" style="max-width: 90vw; max-height: 90vh; width: 1200px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <h3>3D Tour - ${property.title}</h3>
@@ -738,19 +738,19 @@ function open3DTourModal(property) {
         <iframe src="${property.tour}" style="width: 100%; height: 80vh; border: none; border-radius: 8px;"></iframe>
       </div>
     `;
-    document.body.appendChild(newModal);
-    newModal.addEventListener("click", (e) => {
-      if (e.target === newModal) {
-        newModal.classList.remove("open");
+    document.body.appendChild(tourModal);
+    tourModal.addEventListener("click", (e) => {
+      if (e.target === tourModal) {
+        tourModal.classList.remove("open");
       }
     });
-    newModal.classList.add("open");
+    tourModal.classList.add("open");
   } else {
-    const iframe = modal.querySelector("iframe");
+    const iframe = tourModal.querySelector("iframe");
     if (iframe) iframe.src = property.tour;
-    const title = modal.querySelector("h3");
+    const title = tourModal.querySelector("h3");
     if (title) title.textContent = `3D Tour - ${property.title}`;
-    modal.classList.add("open");
+    tourModal.classList.add("open");
   }
 }
 
@@ -758,12 +758,12 @@ function openViewingRequestModal(propertyId) {
   const property = properties.find(p => p.id === propertyId);
   if (!property) return;
   
-  let modal = document.getElementById("viewingModal");
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "viewingModal";
-    modal.className = "modal";
-    modal.innerHTML = `
+  let viewingModal = document.getElementById("viewingModal");
+  if (!viewingModal) {
+    viewingModal = document.createElement("div");
+    viewingModal.id = "viewingModal";
+    viewingModal.className = "modal";
+    viewingModal.innerHTML = `
       <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
           <h3>Request a Viewing</h3>
@@ -790,19 +790,19 @@ function openViewingRequestModal(propertyId) {
         </form>
       </div>
     `;
-    document.body.appendChild(modal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.classList.remove("open");
+    document.body.appendChild(viewingModal);
+    viewingModal.addEventListener("click", (e) => {
+      if (e.target === viewingModal) {
+        viewingModal.classList.remove("open");
       }
     });
   }
   
-  const form = modal.querySelector("form");
+  const form = viewingModal.querySelector("form");
   if (form) {
     form.onsubmit = (e) => handleViewingRequest(e, propertyId);
   }
-  modal.classList.add("open");
+  viewingModal.classList.add("open");
 }
 
 function handleViewingRequest(event, propertyId) {
