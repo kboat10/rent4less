@@ -758,12 +758,12 @@ function openViewingRequestModal(propertyId) {
   const property = properties.find(p => p.id === propertyId);
   if (!property) return;
   
-  const modal = document.getElementById("viewingModal");
+  let modal = document.getElementById("viewingModal");
   if (!modal) {
-    const newModal = document.createElement("div");
-    newModal.id = "viewingModal";
-    newModal.className = "modal";
-    newModal.innerHTML = `
+    modal = document.createElement("div");
+    modal.id = "viewingModal";
+    modal.className = "modal";
+    modal.innerHTML = `
       <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
           <h3>Request a Viewing</h3>
@@ -790,15 +790,14 @@ function openViewingRequestModal(propertyId) {
         </form>
       </div>
     `;
-    document.body.appendChild(newModal);
-    newModal.addEventListener("click", (e) => {
-      if (e.target === newModal) {
-        newModal.classList.remove("open");
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("open");
       }
     });
   }
   
-  const modal = document.getElementById("viewingModal");
   const form = modal.querySelector("form");
   if (form) {
     form.onsubmit = (e) => handleViewingRequest(e, propertyId);
