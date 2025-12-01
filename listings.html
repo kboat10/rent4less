@@ -206,38 +206,7 @@
       </div>
     </div>
 
-    <script src="script.js" defer></script>
-    <script>
-      // Test script connection
-      console.log("✅ listings.html script tag executed");
-      console.log("📄 Page URL:", window.location.href);
-      
-      // Verify script.js loaded - check after a delay to ensure script has executed
-      window.addEventListener('load', function() {
-        console.log("✅ Page fully loaded");
-        console.log("🔍 Checking for listingGrid:", !!document.getElementById("listingGrid"));
-        
-        // Wait a bit for script to execute
-        setTimeout(function() {
-          console.log("🔍 Properties array exists:", typeof properties !== 'undefined');
-          if (typeof properties !== 'undefined') {
-            console.log("🔍 Properties count:", properties.length);
-            // Force render if properties exist but aren't showing
-            if (properties.length > 0) {
-              const listingGrid = document.getElementById("listingGrid");
-              if (listingGrid && listingGrid.children.length === 0) {
-                console.log("⚠️ Properties exist but not rendered - forcing render...");
-                if (typeof renderWithActiveFilters === 'function') {
-                  renderWithActiveFilters();
-                }
-              }
-            }
-          } else {
-            console.error("❌ Properties still undefined after script load!");
-          }
-        }, 500);
-      });
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>
 

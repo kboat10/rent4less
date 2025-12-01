@@ -1,7 +1,17 @@
-// Script loaded indicator
-console.log("✅ script.js loaded successfully");
+// ============================================
+// RENT4LESS - Main JavaScript
+// ============================================
 
-// Get DOM elements (these may be null if script runs before DOM is ready, which is fine)
+// Constants
+const STORAGE_KEY = "rent4less-properties";
+const FAVORITES_KEY = "rent4less-favorites";
+const LISTINGS_DATA_URL = "data/listings.json";
+
+// Global state
+var properties = [];
+var savedPropertyIds = [];
+
+// DOM Elements (will be null until DOM is ready)
 const propertyForm = document.getElementById("propertyForm");
 const listingGrid = document.getElementById("listingGrid");
 const savedGrid = document.getElementById("savedGrid");
@@ -17,640 +27,289 @@ const yearSpan = document.getElementById("year");
 const propertyModal = document.getElementById("propertyModal");
 const propertyModalContent = document.getElementById("propertyModalContent");
 
-// Log element availability
-console.log("🔍 DOM Elements check:", {
-  listingGrid: !!listingGrid,
-  savedGrid: !!savedGrid,
-  budgetFilter: !!budgetFilter,
-  flexibilityFilter: !!flexibilityFilter
-});
-
-const STORAGE_KEY = "rent4less-properties";
-const FAVORITES_KEY = "rent4less-favorites";
-const LISTINGS_DATA_URL = "data/listings.json";
-
-// Embedded listings data (loaded from JSON file)
-const EMBEDDED_LISTINGS_DATA = {
-  "listings": [
-    {
-      "id": "prop-001",
-      "title": "Modern 2-Bed Apartment · East Legon",
-      "location": "East Legon, Accra",
-      "price": 3200,
-      "paymentFlexibility": "Monthly or Quarterly",
-      "roomType": "Apartment",
-      "bedrooms": 2,
-      "bathrooms": 2,
-      "area": 95,
-      "description": "Furnished apartment with backup power, Wi-Fi, and proximity to business hubs. Employer-backed payment guaranteed. Modern kitchen, spacious living area, and secure compound.",
-      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-      "verified": true,
-      "landlordName": "Kwame Asante",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Backup Power", "Wi-Fi", "Security", "Parking", "Furnished"]
-    },
-    {
-      "id": "prop-002",
-      "title": "Studio Loft · Osu",
-      "location": "Osu, Accra",
-      "price": 1800,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Studio",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 52,
-      "description": "Bright loft with 3D Smart Tour available. Ideal for young professionals who want nightlife and short commutes. Modern finishes, high ceilings, and natural light.",
-      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
-      "verified": true,
-      "landlordName": "Ama Mensah",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Wi-Fi", "Furnished", "Security", "High Ceilings"]
-    },
-    {
-      "id": "prop-003",
-      "title": "Family Home · Tema Community 10",
-      "location": "Tema Community 10",
-      "price": 2500,
-      "paymentFlexibility": "Quarterly",
-      "roomType": "Apartment",
-      "bedrooms": 3,
-      "bathrooms": 3,
-      "area": 140,
-      "description": "Spacious home with private compound and community security. Tenant reputation score of previous tenant: 4.8/5. Perfect for families with children.",
-      "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-      "verified": true,
-      "landlordName": "Kofi Boateng",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Compound", "Security", "Parking", "3 Bedrooms", "Family-Friendly"]
-    },
-    {
-      "id": "prop-004",
-      "title": "Cozy Shared Room · Adum",
-      "location": "Adum, Kumasi",
-      "price": 450,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Shared",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 25,
-      "description": "Comfortable shared room in a safe, well-maintained house. Perfect for students or young professionals. Utilities included. Clean, modern shared spaces.",
-      "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Yaa Owusu",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Utilities Included", "Wi-Fi", "Shared Kitchen", "Security"]
-    },
-    {
-      "id": "prop-005",
-      "title": "Private Room with Ensuite · Airport Residential",
-      "location": "Airport Residential, Accra",
-      "price": 1200,
-      "paymentFlexibility": "Monthly or Quarterly",
-      "roomType": "Private",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 35,
-      "description": "Private room with ensuite bathroom in a modern house. Shared kitchen and living area. Close to airport and business district. Ideal for professionals.",
-      "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Nana Adjei",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Ensuite Bathroom", "Wi-Fi", "Shared Kitchen", "Security", "Parking"]
-    },
-    {
-      "id": "prop-006",
-      "title": "Luxury 3-Bed Apartment · Cantonments",
-      "location": "Cantonments, Accra",
-      "price": 4500,
-      "paymentFlexibility": "Quarterly",
-      "roomType": "Apartment",
-      "bedrooms": 3,
-      "bathrooms": 2,
-      "area": 180,
-      "description": "Premium furnished apartment with modern amenities, security, and backup power. Ideal for families or executives. High-end finishes throughout.",
-      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-      "verified": true,
-      "landlordName": "Efua Tetteh",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Backup Power", "Wi-Fi", "Security", "Parking", "Furnished", "AC", "Modern Kitchen"]
-    },
-    {
-      "id": "prop-007",
-      "title": "Affordable Studio · Labone",
-      "location": "Labone, Accra",
-      "price": 900,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Studio",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 40,
-      "description": "Budget-friendly studio apartment in a quiet neighborhood. Perfect for first-time renters. All utilities included. Safe and secure area.",
-      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Kojo Appiah",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Utilities Included", "Wi-Fi", "Security"]
-    },
-    {
-      "id": "prop-008",
-      "title": "Shared Room · University Area",
-      "location": "University Area, Cape Coast",
-      "price": 350,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Shared",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 20,
-      "description": "Student-friendly shared accommodation near university. Safe, affordable, and well-maintained. Perfect for students. Study-friendly environment.",
-      "image": "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Akosua Asiedu",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Utilities Included", "Wi-Fi", "Study Area", "Security"]
-    },
-    {
-      "id": "prop-009",
-      "title": "Modern 1-Bed Apartment · Spintex",
-      "location": "Spintex, Accra",
-      "price": 2000,
-      "paymentFlexibility": "Monthly or Quarterly",
-      "roomType": "Apartment",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 65,
-      "description": "Modern apartment with contemporary finishes. Close to shopping malls and business areas. Secure compound with parking. Ideal for professionals.",
-      "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
-      "verified": true,
-      "landlordName": "Kwabena Osei",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Parking", "Wi-Fi", "Security", "Modern Finishes"]
-    },
-    {
-      "id": "prop-010",
-      "title": "Private Room · Takoradi",
-      "location": "Takoradi, Western Region",
-      "price": 600,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Private",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 30,
-      "description": "Private room in a family home. Shared kitchen and living space. Peaceful neighborhood with good security. Close to city center.",
-      "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Mariama Sule",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Shared Kitchen", "Wi-Fi", "Security"]
-    },
-    {
-      "id": "prop-011",
-      "title": "2-Bed Apartment · Dzorwulu",
-      "location": "Dzorwulu, Accra",
-      "price": 2800,
-      "paymentFlexibility": "Quarterly",
-      "roomType": "Apartment",
-      "bedrooms": 2,
-      "bathrooms": 2,
-      "area": 110,
-      "description": "Spacious 2-bedroom apartment in a prime location. Fully furnished with modern appliances. Ideal for professionals or small families.",
-      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
-      "verified": true,
-      "landlordName": "David Ampofo",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Furnished", "Wi-Fi", "Security", "Parking", "Modern Appliances"]
-    },
-    {
-      "id": "prop-012",
-      "title": "Studio Apartment · Osu",
-      "location": "Osu, Accra",
-      "price": 1500,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Studio",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 45,
-      "description": "Compact studio in the heart of Osu. Walking distance to restaurants, shops, and nightlife. Perfect for young professionals seeking vibrant area.",
-      "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-      "verified": true,
-      "landlordName": "Adjoa Mensah",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Wi-Fi", "Furnished", "Security", "Prime Location"]
-    },
-    {
-      "id": "prop-013",
-      "title": "Shared Room · East Legon",
-      "location": "East Legon, Accra",
-      "price": 500,
-      "paymentFlexibility": "Monthly",
-      "roomType": "Shared",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 22,
-      "description": "Affordable shared room in a well-located house. Close to universities and business areas. Utilities and Wi-Fi included. Clean and modern.",
-      "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Emmanuel Quaye",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Utilities Included", "Wi-Fi", "Security", "Shared Kitchen"]
-    },
-    {
-      "id": "prop-014",
-      "title": "Luxury Studio · Airport Ridge",
-      "location": "Airport Ridge, Takoradi",
-      "price": 1100,
-      "paymentFlexibility": "Monthly or Quarterly",
-      "roomType": "Studio",
-      "bedrooms": 1,
-      "bathrooms": 1,
-      "area": 50,
-      "description": "Modern studio apartment with premium finishes. Close to airport and business district. Secure compound with 24/7 security. Ideal for frequent travelers.",
-      "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
-      "tour": "",
-      "verified": true,
-      "landlordName": "Patience Asare",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["24/7 Security", "Wi-Fi", "Parking", "Premium Finishes", "AC"]
-    },
-    {
-      "id": "prop-015",
-      "title": "3-Bed Family Home · Tema",
-      "location": "Tema, Greater Accra",
-      "price": 3000,
-      "paymentFlexibility": "Quarterly",
-      "roomType": "Apartment",
-      "bedrooms": 3,
-      "bathrooms": 2,
-      "area": 150,
-      "description": "Spacious family home with large compound. Perfect for families. Close to schools, markets, and transport hubs. Safe neighborhood.",
-      "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
-      "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-      "verified": true,
-      "landlordName": "Samuel Adjei",
-      "landlordPhone": "+233 XX XXX XXXX",
-      "amenities": ["Large Compound", "Security", "Parking", "Family-Friendly", "Schools Nearby"]
-    }
-  ]
-};
-
-// IMMEDIATE: Pre-load embedded data RIGHT AFTER it's defined
-console.log("🔄 Pre-loading properties immediately after EMBEDDED_LISTINGS_DATA definition...");
-console.log("🔍 EMBEDDED_LISTINGS_DATA exists:", typeof EMBEDDED_LISTINGS_DATA !== 'undefined');
-if (typeof EMBEDDED_LISTINGS_DATA !== 'undefined' && EMBEDDED_LISTINGS_DATA.listings) {
-  console.log("🔍 EMBEDDED_LISTINGS_DATA.listings length:", EMBEDDED_LISTINGS_DATA.listings.length);
-  properties = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
-    ...listing,
-    id: listing.id || crypto.randomUUID()
-  }));
-  window.properties = properties; // Make globally accessible
-  console.log(`✅ IMMEDIATELY loaded ${properties.length} properties from embedded data`);
-  console.log(`✅ Properties array exists:`, typeof properties !== 'undefined', 'Length:', properties.length);
-} else {
-  console.error("❌ CRITICAL: EMBEDDED_LISTINGS_DATA not available!");
-}
-
-// Load properties from JSON file (with embedded fallback)
-async function loadPropertiesFromJSON() {
-  // First try to fetch from JSON file (primary source)
-  try {
-    const response = await fetch(LISTINGS_DATA_URL);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.listings && Array.isArray(data.listings) && data.listings.length > 0) {
-        console.log(`✅ Loaded ${data.listings.length} listings from JSON file`);
-        return data.listings.map(listing => ({
-          ...listing,
-          id: listing.id || crypto.randomUUID()
-        }));
-      } else {
-        console.warn("JSON file loaded but no listings found, using embedded data");
-      }
-    } else {
-      console.warn(`JSON file fetch returned status ${response.status}, using embedded data`);
-    }
-  } catch (error) {
-    console.warn("JSON file not available, using embedded data:", error.message);
+// ============================================
+// PROPERTY DATA - Embedded listings
+// ============================================
+const EMBEDDED_LISTINGS = [
+  {
+    "id": "prop-001",
+    "title": "Modern 2-Bed Apartment · East Legon",
+    "location": "East Legon, Accra",
+    "price": 3200,
+    "paymentFlexibility": "Monthly or Quarterly",
+    "roomType": "Apartment",
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "area": 95,
+    "description": "Furnished apartment with backup power, Wi-Fi, and proximity to business hubs. Employer-backed payment guaranteed. Modern kitchen, spacious living area, and secure compound.",
+    "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+    "verified": true,
+    "landlordName": "Kwame Asante",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Backup Power", "Wi-Fi", "Security", "Parking", "Furnished"]
+  },
+  {
+    "id": "prop-002",
+    "title": "Studio Loft · Osu",
+    "location": "Osu, Accra",
+    "price": 1800,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Studio",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 52,
+    "description": "Bright loft with 3D Smart Tour available. Ideal for young professionals who want nightlife and short commutes. Modern finishes, high ceilings, and natural light.",
+    "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
+    "verified": true,
+    "landlordName": "Ama Mensah",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Wi-Fi", "Furnished", "Security", "High Ceilings"]
+  },
+  {
+    "id": "prop-003",
+    "title": "Family Home · Tema Community 10",
+    "location": "Tema Community 10",
+    "price": 2500,
+    "paymentFlexibility": "Quarterly",
+    "roomType": "Apartment",
+    "bedrooms": 3,
+    "bathrooms": 3,
+    "area": 140,
+    "description": "Spacious home with private compound and community security. Tenant reputation score of previous tenant: 4.8/5. Perfect for families with children.",
+    "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+    "verified": true,
+    "landlordName": "Kofi Boateng",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Compound", "Security", "Parking", "3 Bedrooms", "Family-Friendly"]
+  },
+  {
+    "id": "prop-004",
+    "title": "Cozy Shared Room · Adum",
+    "location": "Adum, Kumasi",
+    "price": 450,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Shared",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 25,
+    "description": "Comfortable shared room in a safe, well-maintained house. Perfect for students or young professionals. Utilities included. Clean, modern shared spaces.",
+    "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Yaa Owusu",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Utilities Included", "Wi-Fi", "Shared Kitchen", "Security"]
+  },
+  {
+    "id": "prop-005",
+    "title": "Private Room with Ensuite · Airport Residential",
+    "location": "Airport Residential, Accra",
+    "price": 1200,
+    "paymentFlexibility": "Monthly or Quarterly",
+    "roomType": "Private",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 35,
+    "description": "Private room with ensuite bathroom in a modern house. Shared kitchen and living area. Close to airport and business district. Ideal for professionals.",
+    "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Nana Adjei",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Ensuite Bathroom", "Wi-Fi", "Shared Kitchen", "Security", "Parking"]
+  },
+  {
+    "id": "prop-006",
+    "title": "Luxury 3-Bed Apartment · Cantonments",
+    "location": "Cantonments, Accra",
+    "price": 4500,
+    "paymentFlexibility": "Quarterly",
+    "roomType": "Apartment",
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "area": 180,
+    "description": "Premium furnished apartment with modern amenities, security, and backup power. Ideal for families or executives. High-end finishes throughout.",
+    "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+    "verified": true,
+    "landlordName": "Efua Tetteh",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Backup Power", "Wi-Fi", "Security", "Parking", "Furnished", "AC", "Modern Kitchen"]
+  },
+  {
+    "id": "prop-007",
+    "title": "Affordable Studio · Labone",
+    "location": "Labone, Accra",
+    "price": 900,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Studio",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 40,
+    "description": "Budget-friendly studio apartment in a quiet neighborhood. Perfect for first-time renters. All utilities included. Safe and secure area.",
+    "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Kojo Appiah",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Utilities Included", "Wi-Fi", "Security"]
+  },
+  {
+    "id": "prop-008",
+    "title": "Shared Room · University Area",
+    "location": "University Area, Cape Coast",
+    "price": 350,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Shared",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 20,
+    "description": "Student-friendly shared accommodation near university. Safe, affordable, and well-maintained. Perfect for students. Study-friendly environment.",
+    "image": "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Akosua Asiedu",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Utilities Included", "Wi-Fi", "Study Area", "Security"]
+  },
+  {
+    "id": "prop-009",
+    "title": "Modern 1-Bed Apartment · Spintex",
+    "location": "Spintex, Accra",
+    "price": 2000,
+    "paymentFlexibility": "Monthly or Quarterly",
+    "roomType": "Apartment",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 65,
+    "description": "Modern apartment with contemporary finishes. Close to shopping malls and business areas. Secure compound with parking. Ideal for professionals.",
+    "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
+    "verified": true,
+    "landlordName": "Kwabena Osei",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Parking", "Wi-Fi", "Security", "Modern Finishes"]
+  },
+  {
+    "id": "prop-010",
+    "title": "Private Room · Takoradi",
+    "location": "Takoradi, Western Region",
+    "price": 600,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Private",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 30,
+    "description": "Private room in a family home. Shared kitchen and living space. Peaceful neighborhood with good security. Close to city center.",
+    "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Mariama Sule",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Shared Kitchen", "Wi-Fi", "Security"]
+  },
+  {
+    "id": "prop-011",
+    "title": "2-Bed Apartment · Dzorwulu",
+    "location": "Dzorwulu, Accra",
+    "price": 2800,
+    "paymentFlexibility": "Quarterly",
+    "roomType": "Apartment",
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "area": 110,
+    "description": "Spacious 2-bedroom apartment in a prime location. Fully furnished with modern appliances. Ideal for professionals or small families.",
+    "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=SxQLZvJ8qFj",
+    "verified": true,
+    "landlordName": "David Ampofo",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Furnished", "Wi-Fi", "Security", "Parking", "Modern Appliances"]
+  },
+  {
+    "id": "prop-012",
+    "title": "Studio Apartment · Osu",
+    "location": "Osu, Accra",
+    "price": 1500,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Studio",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 45,
+    "description": "Compact studio in the heart of Osu. Walking distance to restaurants, shops, and nightlife. Perfect for young professionals seeking vibrant area.",
+    "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+    "verified": true,
+    "landlordName": "Adjoa Mensah",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Wi-Fi", "Furnished", "Security", "Prime Location"]
+  },
+  {
+    "id": "prop-013",
+    "title": "Shared Room · East Legon",
+    "location": "East Legon, Accra",
+    "price": 500,
+    "paymentFlexibility": "Monthly",
+    "roomType": "Shared",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 22,
+    "description": "Affordable shared room in a well-located house. Close to universities and business areas. Utilities and Wi-Fi included. Clean and modern.",
+    "image": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Emmanuel Quaye",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Utilities Included", "Wi-Fi", "Security", "Shared Kitchen"]
+  },
+  {
+    "id": "prop-014",
+    "title": "Luxury Studio · Airport Ridge",
+    "location": "Airport Ridge, Takoradi",
+    "price": 1100,
+    "paymentFlexibility": "Monthly or Quarterly",
+    "roomType": "Studio",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "area": 50,
+    "description": "Modern studio apartment with premium finishes. Close to airport and business district. Secure compound with 24/7 security. Ideal for frequent travelers.",
+    "image": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&h=600&fit=crop",
+    "tour": "",
+    "verified": true,
+    "landlordName": "Patience Asare",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["24/7 Security", "Wi-Fi", "Parking", "Premium Finishes", "AC"]
+  },
+  {
+    "id": "prop-015",
+    "title": "3-Bed Family Home · Tema",
+    "location": "Tema, Greater Accra",
+    "price": 3000,
+    "paymentFlexibility": "Quarterly",
+    "roomType": "Apartment",
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "area": 150,
+    "description": "Spacious family home with large compound. Perfect for families. Close to schools, markets, and transport hubs. Safe neighborhood.",
+    "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop",
+    "tour": "https://my.matterport.com/show/?m=BM7s6FDX6zF",
+    "verified": true,
+    "landlordName": "Samuel Adjei",
+    "landlordPhone": "+233 XX XXX XXXX",
+    "amenities": ["Large Compound", "Security", "Parking", "Family-Friendly", "Schools Nearby"]
   }
-  
-  // Fallback to embedded data if JSON file is not available
-  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
-    const listings = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
-      ...listing,
-      id: listing.id || crypto.randomUUID()
-    }));
-    console.log(`✅ Loaded ${listings.length} listings from embedded data (fallback)`);
-    return listings;
-  }
-  
-  // Final fallback to default properties
-  console.warn("No data sources available, using default properties");
-  return getDefaultProperties();
-}
-
-function getDefaultProperties() {
-  return [
-  {
-    id: crypto.randomUUID(),
-    title: "Modern 2-Bed Apartment · East Legon",
-    location: "East Legon, Accra",
-    price: 3200,
-    paymentFlexibility: "Monthly or Quarterly",
-    roomType: "Apartment",
-    bedrooms: 2,
-    bathrooms: 2,
-    area: 95,
-    description:
-      "Furnished apartment with backup power, Wi-Fi, and proximity to business hubs. Employer-backed payment guaranteed.",
-    image:
-      "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981440/east-legon-apartment.jpg",
-    tour: "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Studio Loft · Osu",
-    location: "Osu, Accra",
-    price: 1800,
-    paymentFlexibility: "Monthly",
-    roomType: "Studio",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 52,
-    description:
-      "Bright loft with 3D Smart Tour available. Ideal for young professionals who want nightlife and short commutes.",
-    image:
-      "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981440/osu-loft.jpg",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Family Home · Tema Community 10",
-    location: "Tema Community 10",
-    price: 2500,
-    paymentFlexibility: "Quarterly",
-    roomType: "Apartment",
-    bedrooms: 3,
-    bathrooms: 3,
-    area: 140,
-    description:
-      "Spacious home with private compound and community security. Tenant reputation score of previous tenant: 4.8/5.",
-    image:
-      "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981440/tema-family-home.jpg",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Cozy Shared Room · Adum",
-    location: "Adum, Kumasi",
-    price: 450,
-    paymentFlexibility: "Monthly",
-    roomType: "Shared",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 25,
-    description:
-      "Comfortable shared room in a safe, well-maintained house. Perfect for students or young professionals. Utilities included.",
-    image: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Private Room with Ensuite · Airport Residential",
-    location: "Airport Residential, Accra",
-    price: 1200,
-    paymentFlexibility: "Monthly or Quarterly",
-    roomType: "Private",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 35,
-    description:
-      "Private room with ensuite bathroom in a modern house. Shared kitchen and living area. Close to airport and business district.",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Luxury 3-Bed Apartment · Cantonments",
-    location: "Cantonments, Accra",
-    price: 4500,
-    paymentFlexibility: "Quarterly",
-    roomType: "Apartment",
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 180,
-    description:
-      "Premium furnished apartment with modern amenities, security, and backup power. Ideal for families or executives.",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
-    tour: "https://my.matterport.com/show/?m=BM7s6FDX6zF",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Affordable Studio · Labone",
-    location: "Labone, Accra",
-    price: 900,
-    paymentFlexibility: "Monthly",
-    roomType: "Studio",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 40,
-    description:
-      "Budget-friendly studio apartment in a quiet neighborhood. Perfect for first-time renters. All utilities included.",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Shared Room · University Area",
-    location: "University Area, Cape Coast",
-    price: 350,
-    paymentFlexibility: "Monthly",
-    roomType: "Shared",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 20,
-    description:
-      "Student-friendly shared accommodation near university. Safe, affordable, and well-maintained. Perfect for students.",
-    image: "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Modern 1-Bed Apartment · Spintex",
-    location: "Spintex, Accra",
-    price: 2000,
-    paymentFlexibility: "Monthly or Quarterly",
-    roomType: "Apartment",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 65,
-    description:
-      "Modern apartment with contemporary finishes. Close to shopping malls and business areas. Secure compound with parking.",
-    image: "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Private Room · Takoradi",
-    location: "Takoradi, Western Region",
-    price: 600,
-    paymentFlexibility: "Monthly",
-    roomType: "Private",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 30,
-    description:
-      "Private room in a family home. Shared kitchen and living space. Peaceful neighborhood with good security.",
-    image: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "2-Bed Apartment · Dzorwulu",
-    location: "Dzorwulu, Accra",
-    price: 2800,
-    paymentFlexibility: "Quarterly",
-    roomType: "Apartment",
-    bedrooms: 2,
-    bathrooms: 2,
-    area: 110,
-    description:
-      "Spacious 2-bedroom apartment in a prime location. Fully furnished with modern appliances. Ideal for professionals.",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Studio Apartment · Osu",
-    location: "Osu, Accra",
-    price: 1500,
-    paymentFlexibility: "Monthly",
-    roomType: "Studio",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 45,
-    description:
-      "Compact studio in the heart of Osu. Walking distance to restaurants, shops, and nightlife. Perfect for young professionals.",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Shared Room · East Legon",
-    location: "East Legon, Accra",
-    price: 500,
-    paymentFlexibility: "Monthly",
-    roomType: "Shared",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 22,
-    description:
-      "Affordable shared room in a well-located house. Close to universities and business areas. Utilities and Wi-Fi included.",
-    image: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "Luxury Studio · Airport Ridge",
-    location: "Airport Ridge, Takoradi",
-    price: 1100,
-    paymentFlexibility: "Monthly or Quarterly",
-    roomType: "Studio",
-    bedrooms: 1,
-    bathrooms: 1,
-    area: 50,
-    description:
-      "Modern studio apartment with premium finishes. Close to airport and business district. Secure compound with 24/7 security.",
-    image: "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800",
-    tour: "",
-    verified: true,
-  },
-  {
-    id: crypto.randomUUID(),
-    title: "3-Bed Family Home · Tema",
-    location: "Tema, Greater Accra",
-    price: 3000,
-    paymentFlexibility: "Quarterly",
-    roomType: "Apartment",
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 150,
-    description:
-      "Spacious family home with large compound. Perfect for families. Close to schools, markets, and transport hubs.",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
-    tour: "",
-    verified: true,
-  },
 ];
 
-async function loadProperties() {
-  // First try to load from JSON file
-  const jsonProperties = await loadPropertiesFromJSON();
-  
-  // Then check localStorage for user-added properties
-  const saved = localStorage.getItem(STORAGE_KEY);
-  let userAddedProperties = [];
-  
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        // Filter out properties that are already in JSON (by ID)
-        const jsonIds = new Set(jsonProperties.map(p => p.id));
-        userAddedProperties = parsed.filter(p => !jsonIds.has(p.id));
-      }
-    } catch (error) {
-      console.warn("Failed to parse saved properties", error);
-    }
-  }
-  
-  // Combine JSON properties with user-added ones
-  return [...jsonProperties, ...userAddedProperties];
-}
+// Load properties immediately from embedded data
+properties = EMBEDDED_LISTINGS;
+window.properties = properties; // Make globally accessible
 
-// Global properties array - must be accessible everywhere
-var properties = [];
-let savedPropertyIds = loadSavedProperties();
-
-// Properties should already be loaded above, but this is a backup check
-if (!properties || properties.length === 0) {
-  console.warn("⚠️ Properties not loaded yet, attempting backup load...");
-  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
-    properties = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
-      ...listing,
-      id: listing.id || crypto.randomUUID()
-    }));
-    window.properties = properties;
-    console.log(`✅ Backup loaded ${properties.length} properties`);
-  }
-}
-
-function saveProperties() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(properties));
-}
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat("en-GH", {
@@ -665,18 +324,72 @@ function loadSavedProperties() {
   if (!saved) return [];
   try {
     const parsed = JSON.parse(saved);
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.warn("Failed to parse saved homes", error);
+    return [];
   }
-  return [];
 }
 
 function persistSavedProperties() {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(savedPropertyIds));
 }
+
+function saveProperties() {
+  const userAdded = properties.filter(p => !EMBEDDED_LISTINGS.find(e => e.id === p.id));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(userAdded));
+}
+
+// ============================================
+// PROPERTY LOADING
+// ============================================
+
+async function loadPropertiesFromJSON() {
+  try {
+    const response = await fetch(LISTINGS_DATA_URL);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.listings && Array.isArray(data.listings) && data.listings.length > 0) {
+        return data.listings;
+      }
+    }
+  } catch (error) {
+    console.warn("Could not load from JSON, using embedded data");
+  }
+  return null;
+}
+
+async function loadProperties() {
+  // Try to load from JSON file
+  const jsonProperties = await loadPropertiesFromJSON();
+  if (jsonProperties && jsonProperties.length > 0) {
+    properties = jsonProperties;
+    window.properties = properties;
+    return properties;
+  }
+  
+  // Load user-added properties from localStorage
+  const saved = localStorage.getItem(STORAGE_KEY);
+  let userAdded = [];
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        userAdded = parsed;
+      }
+    } catch (error) {
+      console.warn("Failed to parse saved properties", error);
+    }
+  }
+  
+  // Combine embedded with user-added
+  properties = [...EMBEDDED_LISTINGS, ...userAdded];
+  window.properties = properties;
+  return properties;
+}
+
+// ============================================
+// PROPERTY CARD CREATION
+// ============================================
 
 function createPropertyCard(property, options = {}) {
   const { showRemove = false } = options;
@@ -687,13 +400,10 @@ function createPropertyCard(property, options = {}) {
   imgContainer.style.position = "relative";
   
   const img = document.createElement("img");
-  img.src =
-    property.image ||
-    "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981545/rent4less-placeholder.jpg";
+  img.src = property.image || "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981545/rent4less-placeholder.jpg";
   img.alt = property.title;
   imgContainer.appendChild(img);
   
-  // Verified badge
   if (property.verified) {
     const verifiedBadge = document.createElement("span");
     verifiedBadge.style.cssText = "position: absolute; top: 18px; left: 18px; background: var(--color-secondary); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);";
@@ -701,7 +411,6 @@ function createPropertyCard(property, options = {}) {
     imgContainer.appendChild(verifiedBadge);
   }
   
-  // 3D Tour badge
   if (property.tour && property.tour.trim() !== "") {
     const tourBadge = document.createElement("span");
     tourBadge.style.cssText = "position: absolute; top: 18px; right: 18px; background: var(--color-primary); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);";
@@ -714,11 +423,8 @@ function createPropertyCard(property, options = {}) {
   const favoriteButton = document.createElement("button");
   favoriteButton.className = "favorite-toggle";
   favoriteButton.dataset.id = property.id;
-  favoriteButton.dataset.active = savedPropertyIds.includes(property.id)
-    ? "true"
-    : "false";
-  favoriteButton.innerHTML =
-    favoriteButton.dataset.active === "true" ? "★ Saved" : "☆ Save";
+  favoriteButton.dataset.active = savedPropertyIds.includes(property.id) ? "true" : "false";
+  favoriteButton.innerHTML = favoriteButton.dataset.active === "true" ? "★ Saved" : "☆ Save";
   favoriteButton.addEventListener("click", (event) => {
     event.stopPropagation();
     toggleFavorite(property.id);
@@ -740,9 +446,7 @@ function createPropertyCard(property, options = {}) {
   const price = document.createElement("p");
   price.className = "property-price";
   const sixMonthAdvance = property.price * 6;
-  price.innerHTML = `<span class="estimate-highlight">${formatCurrency(
-    property.price
-  )}</span> per month<br><small style="color: var(--color-muted); font-size: 0.85rem;">6-month advance: ${formatCurrency(sixMonthAdvance)}</small>`;
+  price.innerHTML = `<span class="estimate-highlight">${formatCurrency(property.price)}</span> per month<br><small style="color: var(--color-muted); font-size: 0.85rem;">6-month advance: ${formatCurrency(sixMonthAdvance)}</small>`;
   content.appendChild(price);
 
   const meta = document.createElement("div");
@@ -751,14 +455,10 @@ function createPropertyCard(property, options = {}) {
     meta.innerHTML += `<span>🏠 ${property.roomType}</span>`;
   }
   if (property.bedrooms) {
-    meta.innerHTML += `<span>🛏 ${property.bedrooms} bed${
-      property.bedrooms > 1 ? "s" : ""
-    }</span>`;
+    meta.innerHTML += `<span>🛏 ${property.bedrooms} bed${property.bedrooms > 1 ? "s" : ""}</span>`;
   }
   if (property.bathrooms) {
-    meta.innerHTML += `<span>🛁 ${property.bathrooms} bath${
-      property.bathrooms > 1 ? "s" : ""
-    }</span>`;
+    meta.innerHTML += `<span>🛁 ${property.bathrooms} bath${property.bathrooms > 1 ? "s" : ""}</span>`;
   }
   if (property.area) {
     meta.innerHTML += `<span>📐 ${property.area} m²</span>`;
@@ -776,7 +476,7 @@ function createPropertyCard(property, options = {}) {
   pill.textContent = property.paymentFlexibility || "Flexible";
   actions.appendChild(pill);
 
-  if (property.tour) {
+  if (property.tour && property.tour.trim() !== "") {
     const tourButton = document.createElement("button");
     tourButton.type = "button";
     tourButton.textContent = "View 3D Tour";
@@ -821,75 +521,69 @@ function createPropertyCard(property, options = {}) {
 
   content.appendChild(actions);
   card.appendChild(content);
-
   card.addEventListener("click", () => openPropertyModal(property));
 
   return card;
 }
 
+// ============================================
+// RENDERING
+// ============================================
+
 function renderProperties(list = null, target = null, options = {}) {
-  console.log("🔄 renderProperties() called with list length:", list ? list.length : 0);
-  
-  // If no target provided, try to find listingGrid
   if (!target) {
     target = document.getElementById("listingGrid");
   }
   if (!target) {
-    console.error("❌ Cannot render: listingGrid element not found");
     return;
   }
-  console.log("✅ Target element found:", target.id);
   
   target.innerHTML = "";
-  console.log("✅ Cleared target innerHTML");
   
-  // Determine which list to use
-  let propertiesToRender = [];
-  if (list && Array.isArray(list) && list.length > 0) {
-    propertiesToRender = list;
-    console.log("✅ Using provided list:", list.length);
-  } else if (properties && Array.isArray(properties) && properties.length > 0) {
-    propertiesToRender = properties;
-    console.log("✅ Using global properties array:", properties.length);
-  } else {
-    console.warn("⚠️ No properties to render. List:", list, "Properties:", properties);
-  }
+  const propertiesToRender = (list && list.length > 0) ? list : properties;
   
-  if (!propertiesToRender.length) {
-    console.log("⚠️ No properties to render, showing empty state");
-    const emptyState = document.createElement("div");
-    emptyState.className = "empty-state";
-    const message = (!properties || properties.length === 0) 
-      ? "Loading properties..." 
-      : "No properties found for the selected filters. Try adjusting your budget or payment plan.";
-    emptyState.innerHTML = `
-      <p style="text-align: center; padding: 48px; color: var(--color-muted);">
-        ${message}
-      </p>
-    `;
-    target.appendChild(emptyState);
+  if (!propertiesToRender || propertiesToRender.length === 0) {
+    target.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>No properties found.</p></div>';
     return;
   }
   
-  console.log(`🔄 Rendering ${propertiesToRender.length} property cards...`);
-  let renderedCount = 0;
-  propertiesToRender.forEach((property, index) => {
+  propertiesToRender.forEach(property => {
     try {
-      console.log(`🔄 Creating card ${index + 1}/${propertiesToRender.length} for:`, property.title);
       const card = createPropertyCard(property, options);
       if (card) {
         target.appendChild(card);
-        renderedCount++;
-        console.log(`✅ Card ${index + 1} appended successfully`);
-      } else {
-        console.error(`❌ Card ${index + 1} is null`);
       }
     } catch (error) {
-      console.error(`❌ Error creating property card ${index + 1}:`, error, property);
+      console.error("Error creating card:", error);
     }
   });
-  console.log(`✅ Rendered ${renderedCount}/${propertiesToRender.length} property cards`);
-  console.log(`🔍 Final children count in listingGrid:`, target.children.length);
+}
+
+function getFilteredProperties() {
+  if (!properties || properties.length === 0) return [];
+  
+  let filtered = [...properties];
+  
+  const budgetValue = budgetFilter?.value;
+  if (budgetValue && budgetValue !== "all") {
+    const maxBudget = parseInt(budgetValue);
+    filtered = filtered.filter(p => p.price <= maxBudget);
+  }
+  
+  const flexibilityValue = flexibilityFilter?.value;
+  if (flexibilityValue && flexibilityValue !== "all") {
+    filtered = filtered.filter(p => {
+      const flex = p.paymentFlexibility?.toLowerCase() || "";
+      return flex.includes(flexibilityValue.toLowerCase());
+    });
+  }
+  
+  return filtered;
+}
+
+function renderWithActiveFilters() {
+  const filtered = getFilteredProperties();
+  renderProperties(filtered);
 }
 
 function renderSavedProperties() {
@@ -899,605 +593,68 @@ function renderSavedProperties() {
   const savedList = savedPropertyIds
     .map((id) => properties.find((property) => property.id === id))
     .filter(Boolean);
+    
   if (!savedList.length) {
-    savedGridEl.innerHTML =
-      "<p class=\"empty-state\">You have no saved homes yet. Tap the ☆ Save button on any property to create your shortlist.</p>";
+    savedGridEl.innerHTML = '<p class="empty-state">You have no saved homes yet. Tap the ☆ Save button on any property to create your shortlist.</p>';
     return;
   }
+  
   renderProperties(savedList, savedGridEl, { showRemove: true });
 }
 
-function resetForm(form) {
-  form.reset();
-  const firstField = form.querySelector("input, select, textarea");
-  if (firstField) {
-    firstField.focus();
-  }
-}
-
-function handlePropertySubmit(event) {
-  event.preventDefault();
-  const formData = new FormData(propertyForm);
-  const newProperty = {
-    id: crypto.randomUUID(),
-    title: formData.get("title").trim(),
-    location: formData.get("location").trim(),
-    price: Number(formData.get("price")),
-    paymentFlexibility: formData.get("paymentFlexibility"),
-    roomType: formData.get("roomType") || "Apartment",
-    bedrooms: Number(formData.get("bedrooms")) || null,
-    bathrooms: Number(formData.get("bathrooms")) || null,
-    area: Number(formData.get("area")) || null,
-    description: formData.get("description").trim(),
-    image: formData.get("image").trim(),
-    tour: formData.get("tour").trim(),
-    verified: false, // New listings need verification
-  };
-
-  properties = [newProperty, ...properties];
-  saveProperties();
-  renderWithActiveFilters();
-  renderSavedProperties();
-  resetForm(propertyForm);
-
-  const submitButton = propertyForm.querySelector("button[type='submit']");
-  if (submitButton) {
-    submitButton.textContent = "Published!";
-    submitButton.disabled = true;
-    setTimeout(() => {
-      submitButton.textContent = "Publish property";
-      submitButton.disabled = false;
-    }, 2000);
-  }
-}
-
-function getFilteredProperties() {
-  // Ensure properties array is available
-  if (!properties || properties.length === 0) {
-    console.warn("⚠️ Properties array is empty. Waiting for data to load...");
-    return [];
-  }
-  
-  const budgetFilterEl = document.getElementById("budgetFilter");
-  const flexibilityFilterEl = document.getElementById("flexibilityFilter");
-  const locationFilter = document.getElementById("locationFilter");
-  const roomTypeFilter = document.getElementById("roomTypeFilter");
-  
-  const budgetValue = budgetFilterEl ? Number(budgetFilterEl.value) : 0;
-  const flexibilityValue = flexibilityFilterEl?.value || "Any";
-  const locationValue = locationFilter?.value || "Any";
-  const roomTypeValue = roomTypeFilter?.value || "Any";
-
-  return properties.filter((property) => {
-    const matchesBudget = !budgetValue || budgetValue === 0 || property.price <= budgetValue;
-    const matchesFlexibility =
-      flexibilityValue === "Any" ||
-      property.paymentFlexibility === flexibilityValue;
-    
-    // Location filter - check if property location contains the selected city
-    const matchesLocation = locationValue === "Any" || 
-      property.location.toLowerCase().includes(locationValue.toLowerCase());
-    
-    // Room type filter
-    const matchesRoomType = roomTypeValue === "Any" || 
-      property.roomType === roomTypeValue;
-    
-    return matchesBudget && matchesFlexibility && matchesLocation && matchesRoomType;
-  });
-}
-
-function renderWithActiveFilters() {
-  console.log("🔄 renderWithActiveFilters() called");
-  const listingGridEl = document.getElementById("listingGrid");
-  if (!listingGridEl) {
-    console.error("❌ listingGrid element not found!");
-    return;
-  }
-  console.log("✅ listingGrid element found");
-  
-  // Ensure properties array exists and has data
-  if (!properties || !Array.isArray(properties) || properties.length === 0) {
-    console.error("❌ Properties array is empty or invalid:", properties);
-    listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
-    return;
-  }
-  console.log(`✅ Properties available: ${properties.length}`);
-  
-  const filtered = getFilteredProperties();
-  console.log(`🔄 Rendering ${filtered.length} filtered properties out of ${properties.length} total`);
-  console.log("🔍 Filtered properties:", filtered);
-  
-  // Always render, even if filtered is empty (will show "no matches" message)
-  renderProperties(filtered, listingGridEl);
-  
-  // Update count display
-  const countElement = document.getElementById("listingsCountNumber");
-  if (countElement) {
-    countElement.textContent = filtered.length;
-  }
-  
-  // Verify rendering happened
-  setTimeout(() => {
-    const childrenCount = listingGridEl.children.length;
-    console.log(`🔍 After render, listingGrid has ${childrenCount} children`);
-    if (childrenCount === 0 && filtered.length > 0) {
-      console.error("❌ RENDERING FAILED: Properties exist but no children in listingGrid!");
-    }
-  }, 100);
-}
+// ============================================
+// FILTERS
+// ============================================
 
 function applyFilters() {
   renderWithActiveFilters();
 }
 
 function resetFilters() {
-  const budgetFilterEl = document.getElementById("budgetFilter");
-  const flexibilityFilterEl = document.getElementById("flexibilityFilter");
-  const locationFilter = document.getElementById("locationFilter");
-  const roomTypeFilter = document.getElementById("roomTypeFilter");
-  
-  if (budgetFilterEl) budgetFilterEl.value = "";
-  if (flexibilityFilterEl) flexibilityFilterEl.value = "Any";
-  if (locationFilter) locationFilter.value = "Any";
-  if (roomTypeFilter) roomTypeFilter.value = "Any";
+  if (budgetFilter) budgetFilter.value = "all";
+  if (flexibilityFilter) flexibilityFilter.value = "all";
   renderWithActiveFilters();
 }
 
-function calculateAffordability({ income, household = 1, neighborhood = "" }) {
-  if (!income || income <= 0) {
-    return null;
-  }
+// ============================================
+// PROPERTY SUBMISSION
+// ============================================
 
-  const sanitizedHousehold = household > 0 ? household : 1;
-  const recommendedRatio = 0.35;
-  const stretchRatio = 0.45;
-
-  const recommendedRent = Math.round((income * recommendedRatio) / 50) * 50;
-  const stretchRent = Math.round((income * stretchRatio) / 50) * 50;
-  const suggestedPlan = income < 4000 ? "Monthly" : "Monthly or Quarterly";
-  const affordabilityPercent = ((recommendedRent / income) * 100).toFixed(1);
-
-  const safeWidth = stretchRent
-    ? Math.min(Math.max((recommendedRent / stretchRent) * 100, 8), 100).toFixed(1)
-    : 0;
-  const cursorPercent = stretchRent
-    ? Math.min(Math.max((recommendedRent / stretchRent) * 100, 6), 96).toFixed(1)
-    : 0;
-
-  const matchingProperties = properties
-    .filter((property) => property.price <= stretchRent)
-    .slice(0, 3);
-
-  return {
-    income,
-    household: sanitizedHousehold,
-    neighborhood,
-    recommendedRent,
-    stretchRent,
-    suggestedPlan,
-    affordabilityPercent,
-    safeWidth,
-    cursorPercent,
-    matchingProperties,
-  };
-}
-
-function renderCalculatorSummary(target, data, options = {}) {
-  if (!target) return;
-
-  const placeholderMessage =
-    options.placeholderMessage ||
-    "Enter your income to discover a realistic monthly rent and matched homes.";
-
-  if (!data) {
-    target.innerHTML = `
-      <div class="calc-placeholder">
-        <p class="summary-eyebrow">Estimated rent budget</p>
-        <p class="calc-empty-copy">${placeholderMessage}</p>
-      </div>
-    `;
-    return;
-  }
-
-  const matchesMarkup = data.matchingProperties
-    .map((property) => {
-      const town = property.location.split(",")[0];
-      return `
-        <div class="summary-listing">
-          <span class="listing-pill">${town}</span>
-          <div>
-            <strong>${property.title}</strong>
-            <p>${formatCurrency(property.price)} &bull; ${property.paymentFlexibility}</p>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
-
-  target.innerHTML = `
-    <div class="calculator-preview__summary calc-live-summary">
-      <p class="summary-eyebrow">Estimated rent budget</p>
-      <p class="summary-figure">${formatCurrency(data.recommendedRent)}<span>/mo</span></p>
-      <p class="calc-subtext">≈ ${data.affordabilityPercent}% of take-home pay</p>
-      <div class="summary-meter">
-        <span class="summary-meter__bar summary-meter__bar--stretch" style="width:100%"></span>
-        <span class="summary-meter__bar summary-meter__bar--safe" style="width:${data.safeWidth}%"></span>
-        <span class="summary-meter__cursor" style="left:${data.cursorPercent}%"></span>
-      </div>
-      <ul class="calc-stats">
-        <li><span>Suggested plan</span><strong>${data.suggestedPlan}</strong></li>
-        <li><span>Stretch ceiling</span><strong>${formatCurrency(data.stretchRent)}</strong></li>
-        <li><span>Household size</span><strong>${data.household}</strong></li>
-      </ul>
-      <p class="summary-subhead">Matched homes</p>
-      ${
-        data.matchingProperties.length
-          ? `<div class="calc-matches">${matchesMarkup}</div>`
-          : `<p class="summary-empty">No homes match yet — share your preferences so we can alert you the moment new listings go live.</p>`
-      }
-      ${
-        data.neighborhood
-          ? `<p class="calc-subtext">Tip: we’ll prioritise homes around <strong>${data.neighborhood}</strong> when new listings arrive.</p>`
-          : ""
-      }
-    </div>
-  `;
-}
-
-function setupCalculatorForm(formElement, resultContainer, options = {}) {
-  if (!formElement || !resultContainer) return;
-
-  const { defaults, onResult, placeholderMessage, syncOnInit = true } = options;
-
-  if (defaults) {
-    if (defaults.income != null && formElement.elements["income"]) {
-      formElement.elements["income"].value = defaults.income;
-    }
-    if (defaults.household != null && formElement.elements["household"]) {
-      formElement.elements["household"].value = defaults.household;
-    }
-    if (defaults.neighborhood != null && formElement.elements["neighborhood"]) {
-      formElement.elements["neighborhood"].value = defaults.neighborhood;
-    }
-  }
-
-  const initialData = defaults
-    ? calculateAffordability({
-        income: Number(defaults.income),
-        household: Number(defaults.household) || 1,
-        neighborhood: defaults.neighborhood?.trim() || "",
-      })
-    : null;
-
-  if (initialData) {
-    renderCalculatorSummary(resultContainer, initialData, { placeholderMessage });
-    if (syncOnInit) {
-      onResult?.(initialData);
-    }
-  } else {
-    renderCalculatorSummary(resultContainer, null, { placeholderMessage });
-  }
-
-  formElement.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const formData = new FormData(formElement);
-    const income = Number(formData.get("income"));
-    const household = Number(formData.get("household")) || 1;
-    const neighborhood = formData.get("neighborhood")?.trim();
-
-    const data = calculateAffordability({ income, household, neighborhood });
-    if (!data) {
-      renderCalculatorSummary(resultContainer, null, { placeholderMessage });
-      return;
-    }
-
-    renderCalculatorSummary(resultContainer, data, { placeholderMessage });
-    onResult?.(data);
-  });
-}
-
-function setupModals() {
-  const triggers = document.querySelectorAll("[data-modal-target]");
-  const closeButtons = document.querySelectorAll("[data-close]");
-
-  triggers.forEach((trigger) => {
-    trigger.addEventListener("click", () => {
-      const modalId = trigger.getAttribute("data-modal-target");
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        modal.classList.add("open");
-      }
-    });
-  });
-
-  closeButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      button.closest(".modal")?.classList.remove("open");
-    });
-  });
-
-  document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("modal")) {
-      event.target.classList.remove("open");
-    }
-  });
-}
-
-function openPropertyModal(property) {
-  if (!propertyModal || !propertyModalContent) return;
-  const isSaved = savedPropertyIds.includes(property.id);
-  propertyModalContent.innerHTML = `
-    <div class="modal-body">
-      <div class="modal-media">
-        <img src="${
-          property.image ||
-          "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981545/rent4less-placeholder.jpg"
-        }" alt="${property.title}" />
-      </div>
-      <div class="modal-info">
-        <h3>${property.title}</h3>
-        <p>${property.location}</p>
-        <div class="modal-meta">
-          <span>💰 ${formatCurrency(property.price)} / month</span>
-          <span>💳 6-month advance: ${formatCurrency(property.price * 6)}</span>
-          ${
-            property.bedrooms
-              ? `<span>🛏 ${property.bedrooms} bed${
-                  property.bedrooms > 1 ? "s" : ""
-                }</span>`
-              : ""
-          }
-          ${
-            property.bathrooms
-              ? `<span>🛁 ${property.bathrooms} bath${
-                  property.bathrooms > 1 ? "s" : ""
-                }</span>`
-              : ""
-          }
-          ${
-            property.area
-              ? `<span>📐 ${property.area} m²</span>`
-              : ""
-          }
-        </div>
-        <p>${property.description}</p>
-        ${
-          property.amenities && property.amenities.length > 0
-            ? `<div style="margin: 20px 0;">
-                <h5 style="margin-bottom: 10px;">Amenities</h5>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                  ${property.amenities.map(amenity => `<span style="background: var(--color-primary-soft); color: var(--color-primary-dark); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">${amenity}</span>`).join("")}
-                </div>
-              </div>`
-            : ""
-        }
-        <div class="modal-actions">
-          <button class="button" data-favorite-modal="${
-            property.id
-          }">${isSaved ? "★ Saved" : "☆ Save home"}</button>
-          <button class="button button-primary" data-request-viewing="${
-            property.id
-          }">Request Viewing</button>
-          ${
-            property.tour
-              ? `<button class="button button-ghost" data-3d-tour="${property.id}">View 3D Tour</button>`
-              : `<a class="button button-ghost" href="tenant-tools.html">Request a 3D tour</a>`
-          }
-        </div>
-        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-border);">
-          <h5>Landlord assurance</h5>
-          <ul style="margin: 12px 0; padding-left: 0; list-style: none;">
-            <li style="padding-left: 24px; position: relative; margin-bottom: 8px;">
-              <span style="position: absolute; left: 0; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary);"></span>
-              Tenant reputation score tracking after every lease cycle.
-            </li>
-            <li style="padding-left: 24px; position: relative; margin-bottom: 8px;">
-              <span style="position: absolute; left: 0; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary);"></span>
-              Optional payroll deduction through verified employers.
-            </li>
-            <li style="padding-left: 24px; position: relative;">
-              <span style="position: absolute; left: 0; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary);"></span>
-              Escrow protection from partnering banks &amp; fintechs.
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  `;
-  propertyModal.classList.add("open");
-
-  const modalFavorite = propertyModalContent.querySelector(
-    "[data-favorite-modal]"
-  );
-  modalFavorite?.addEventListener("click", () => {
-    toggleFavorite(property.id);
-  });
-
-  const requestViewingBtn = propertyModalContent.querySelector(
-    "[data-request-viewing]"
-  );
-  requestViewingBtn?.addEventListener("click", () => {
-    openViewingRequestModal(property.id);
-  });
-
-  const tourBtn = propertyModalContent.querySelector("[data-3d-tour]");
-  tourBtn?.addEventListener("click", () => {
-    open3DTourModal(property);
-  });
-}
-
-function open3DTourModal(property) {
-  if (!property.tour) {
-    alert("3D tour not available for this property. Please contact us to request a tour.");
-    return;
-  }
-  
-  const modal = document.createElement("div");
-  modal.className = "modal open";
-  modal.style.display = "flex";
-  modal.style.zIndex = "2000";
-  modal.innerHTML = `
-    <div class="modal-content" style="max-width: 1200px; padding: 0; position: relative;">
-      <button class="modal-close" data-close style="position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">&times;</button>
-      <div style="padding: 32px 32px 24px; background: var(--color-surface);">
-        <h3 style="margin: 0 0 8px; color: var(--color-ink);">${property.title} - 3D Virtual Tour</h3>
-        <p style="margin: 0; color: var(--color-muted);">${property.location}</p>
-        ${property.price ? `<p style="margin: 8px 0 0; color: var(--color-primary); font-weight: 600;">${formatCurrency(property.price)}/month</p>` : ""}
-      </div>
-      <div class="tour-embed" style="width: 100%; height: 600px; border-radius: 0; background: #000; position: relative;">
-        <iframe 
-          src="${property.tour}" 
-          title="3D tour for ${property.title}" 
-          allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
-          style="width: 100%; height: 100%; border: 0;"
-          allowfullscreen
-          loading="lazy"
-        ></iframe>
-      </div>
-      <div style="padding: 24px 32px 32px; background: var(--color-surface);">
-        <p style="margin: 0 0 12px; color: var(--color-muted); font-size: 0.9rem;">
-          <strong>Navigation:</strong> Use your mouse or touch to navigate the 3D tour. Click and drag to look around, scroll to zoom in/out.
-        </p>
-        <button class="button button-primary" data-request-viewing="${property.id}" style="margin-top: 8px;">
-          Request Viewing for This Property
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  
-  const closeBtn = modal.querySelector("[data-close]");
-  closeBtn.addEventListener("click", () => {
-    modal.remove();
-  });
-  
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Add viewing request button handler
-  const requestBtn = modal.querySelector("[data-request-viewing]");
-  if (requestBtn) {
-    requestBtn.addEventListener("click", () => {
-      modal.remove();
-      openViewingRequestModal(property.id);
-    });
-  }
-}
-
-function openViewingRequestModal(propertyId) {
-  const viewingModal = document.getElementById("viewingRequestModal");
-  const viewingForm = document.getElementById("viewingRequestForm");
-  const propertyIdInput = document.getElementById("viewingPropertyId");
-  const modalTitle = viewingModal?.querySelector("h4");
-  
-  if (!viewingModal || !viewingForm || !propertyIdInput) return;
-  
-  // Find the property
-  const property = properties.find(p => p.id === propertyId);
-  
-  // Update modal title with property info
-  if (modalTitle && property) {
-    modalTitle.innerHTML = `Request a Viewing<br><small style="font-size: 0.85rem; color: var(--color-muted); font-weight: 400;">${property.title} - ${property.location}</small>`;
-  }
-  
-  propertyIdInput.value = propertyId;
-  viewingModal.classList.add("open");
-  
-  // Close property modal when opening viewing request
-  if (propertyModal) {
-    propertyModal.classList.remove("open");
-  }
-  
-  // Focus on first input
-  const firstInput = viewingForm.querySelector("input[type='text'], input[type='tel']");
-  if (firstInput) {
-    setTimeout(() => firstInput.focus(), 100);
-  }
-}
-
-function handleViewingRequestSubmit(event) {
+function handlePropertySubmit(event) {
   event.preventDefault();
-  const formData = new FormData(event.target);
-  const propertyId = formData.get("propertyId");
-  const property = properties.find(p => p.id === propertyId);
+  const form = event.target;
+  const formData = new FormData(form);
   
-  if (!property) {
-    alert("Error: Property not found. Please try again.");
-    return;
-  }
-  
-  const data = {
-    propertyId,
-    propertyTitle: property.title,
-    propertyLocation: property.location,
-    propertyPrice: property.price,
-    name: formData.get("name").trim(),
-    phone: formData.get("phone").trim(),
-    email: formData.get("email")?.trim() || "",
-    preferredDate: formData.get("preferredDate") || "",
-    message: formData.get("message")?.trim() || ""
+  const newProperty = {
+    id: crypto.randomUUID(),
+    title: formData.get("title") || "Untitled Property",
+    location: formData.get("location") || "",
+    price: parseInt(formData.get("price")) || 0,
+    paymentFlexibility: formData.get("paymentFlexibility") || "Monthly",
+    roomType: formData.get("roomType") || "Apartment",
+    bedrooms: parseInt(formData.get("bedrooms")) || 1,
+    bathrooms: parseInt(formData.get("bathrooms")) || 1,
+    area: parseInt(formData.get("area")) || 0,
+    description: formData.get("description") || "",
+    image: formData.get("image") || "https://res.cloudinary.com/dv9yh8w46/image/upload/w_800,q_auto/v1730981545/rent4less-placeholder.jpg",
+    tour: formData.get("tour") || "",
+    verified: false,
+    landlordName: formData.get("landlordName") || "",
+    landlordPhone: formData.get("landlordPhone") || "",
+    amenities: (formData.get("amenities") || "").split(",").map(a => a.trim()).filter(Boolean)
   };
   
-  // Validate required fields
-  if (!data.name || !data.phone) {
-    alert("Please fill in all required fields (Name and Phone Number).");
-    return;
-  }
+  properties.push(newProperty);
+  saveProperties();
+  renderWithActiveFilters();
+  form.reset();
   
-  // In production, this would send to Google Sheets/backend
-  console.log("Viewing Request:", data);
-  
-  // Save to localStorage for now (in production, send to backend)
-  const viewingRequests = JSON.parse(localStorage.getItem("rent4less-viewing-requests") || "[]");
-  viewingRequests.push({
-    ...data,
-    timestamp: new Date().toISOString(),
-    status: "pending"
-  });
-  localStorage.setItem("rent4less-viewing-requests", JSON.stringify(viewingRequests));
-  
-  // Create WhatsApp message
-  const whatsappMessage = `🏠 New Viewing Request - Rent4Less
-
-Property: ${data.propertyTitle}
-Location: ${data.propertyLocation}
-Price: GHS ${data.propertyPrice}/month
-
-Tenant Details:
-Name: ${data.name}
-Phone: ${data.phone}
-${data.email ? `Email: ${data.email}\n` : ""}${data.preferredDate ? `Preferred Date: ${data.preferredDate}\n` : ""}${data.message ? `Message: ${data.message}` : ""}
-
-Please contact the tenant to schedule the viewing.`;
-
-  const whatsappUrl = `https://wa.me/233XXXXXXXXX?text=${encodeURIComponent(whatsappMessage)}`;
-  
-  // Show success message
-  const successMessage = `✅ Viewing request submitted successfully!\n\nProperty: ${data.propertyTitle}\n\nOur team will contact you via WhatsApp within 24 hours to confirm your viewing appointment.`;
-  alert(successMessage);
-  
-  // Open WhatsApp (optional - you can comment this out if you don't want it to auto-open)
-  // window.open(whatsappUrl, "_blank");
-  
-  // Close modal and reset form
-  const viewingModal = document.getElementById("viewingRequestModal");
-  if (viewingModal) {
-    viewingModal.classList.remove("open");
-  }
-  
-  // Reset form
-  event.target.reset();
-  
-  // Reset modal title
-  const modalTitle = viewingModal?.querySelector("h4");
-  if (modalTitle) {
-    modalTitle.textContent = "Request a Viewing";
-  }
+  alert("Property listed successfully!");
 }
+
+// ============================================
+// FAVORITES
+// ============================================
 
 function toggleFavorite(propertyId, options = {}) {
   const { forceRemove = false } = options;
@@ -1519,95 +676,333 @@ function toggleFavorite(propertyId, options = {}) {
   }
 }
 
-async function init() {
-  console.log("🚀 INIT FUNCTION CALLED");
-  console.log("📄 Current page:", window.location.pathname);
-  
-  // Show loading state
-  const listingGridEl = document.getElementById("listingGrid");
-  console.log("🔍 listingGrid element found:", !!listingGridEl);
-  
-  if (listingGridEl) {
-    listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
-  } else {
-    console.error("❌ CRITICAL: listingGrid element NOT FOUND in DOM!");
-    console.log("Available elements with 'listing' in id:", 
-      Array.from(document.querySelectorAll('[id*="listing"]')).map(el => el.id)
-    );
-  }
-  
-  // IMMEDIATE FALLBACK: Load embedded data first to ensure we always have properties
-  if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
-    const embeddedListings = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
-      ...listing,
-      id: listing.id || crypto.randomUUID()
-    }));
-    console.log(`✅ Pre-loaded ${embeddedListings.length} listings from embedded data`);
-    properties = embeddedListings; // Set immediately as fallback
-  }
-  
-  try {
-    // Load properties from JSON file (will override embedded if successful)
-    console.log("🔄 Starting to load properties from JSON...");
-    const loadedProperties = await loadProperties();
-    
-    if (loadedProperties && loadedProperties.length > 0) {
-      properties = loadedProperties;
-      console.log(`✅ Loaded ${properties.length} properties from JSON file`);
-    } else {
-      console.warn("⚠️ JSON file returned no properties, using embedded data");
-    }
-    
-    // Log for debugging
-    console.log(`✅ Total properties available: ${properties.length}`);
-    console.log(`✅ Properties with 3D tours: ${properties.filter(p => p.tour && p.tour.trim() !== "").length}`);
-    
-    if (!properties || properties.length === 0) {
-      console.error("❌ CRITICAL: No properties available at all!");
-      if (listingGridEl) {
-        listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error: No properties found. Please contact support.</p></div>';
+// ============================================
+// MODALS
+// ============================================
+
+function setupModals() {
+  if (propertyModal) {
+    propertyModal.addEventListener("click", (e) => {
+      if (e.target === propertyModal) {
+        propertyModal.classList.remove("open");
       }
+    });
+  }
+}
+
+function openPropertyModal(property) {
+  if (!propertyModal || !propertyModalContent) return;
+  
+  const isSaved = savedPropertyIds.includes(property.id);
+  
+  propertyModalContent.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px;">
+      <h2 style="margin: 0;">${property.title}</h2>
+      <button class="modal-close" onclick="document.getElementById('propertyModal').classList.remove('open')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--color-muted);">×</button>
+    </div>
+    <img src="${property.image}" alt="${property.title}" style="width: 100%; border-radius: 12px; margin-bottom: 24px;">
+    <p style="color: var(--color-muted); margin-bottom: 16px;">${property.location}</p>
+    <p style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 24px;">${formatCurrency(property.price)}/month</p>
+    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+      ${property.roomType ? `<span>🏠 ${property.roomType}</span>` : ""}
+      ${property.bedrooms ? `<span>🛏 ${property.bedrooms} bed${property.bedrooms > 1 ? "s" : ""}</span>` : ""}
+      ${property.bathrooms ? `<span>🛁 ${property.bathrooms} bath${property.bathrooms > 1 ? "s" : ""}</span>` : ""}
+      ${property.area ? `<span>📐 ${property.area} m²</span>` : ""}
+    </div>
+    <p style="margin-bottom: 24px; line-height: 1.6;">${property.description}</p>
+    ${property.amenities && property.amenities.length > 0 ? `<div style="margin-bottom: 24px;"><strong>Amenities:</strong> ${property.amenities.join(", ")}</div>` : ""}
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button class="button button-primary" onclick="toggleFavorite('${property.id}'); document.getElementById('propertyModal').classList.remove('open');">${isSaved ? "★ Remove from Saved" : "☆ Save Property"}</button>
+      ${property.tour && property.tour.trim() !== "" ? `<button class="button" onclick="open3DTourModal(${JSON.stringify(property).replace(/"/g, '&quot;')})">View 3D Tour</button>` : ""}
+      <button class="button" onclick="openViewingRequestModal('${property.id}')">Request Viewing</button>
+    </div>
+  `;
+  
+  propertyModal.classList.add("open");
+}
+
+function open3DTourModal(property) {
+  if (!property || !property.tour) return;
+  
+  const modal = document.getElementById("tourModal");
+  if (!modal) {
+    const newModal = document.createElement("div");
+    newModal.id = "tourModal";
+    newModal.className = "modal";
+    newModal.innerHTML = `
+      <div class="modal-content" style="max-width: 90vw; max-height: 90vh; width: 1200px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3>3D Tour - ${property.title}</h3>
+          <button class="modal-close" onclick="document.getElementById('tourModal').classList.remove('open')" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <iframe src="${property.tour}" style="width: 100%; height: 80vh; border: none; border-radius: 8px;"></iframe>
+      </div>
+    `;
+    document.body.appendChild(newModal);
+    newModal.addEventListener("click", (e) => {
+      if (e.target === newModal) {
+        newModal.classList.remove("open");
+      }
+    });
+    newModal.classList.add("open");
+  } else {
+    const iframe = modal.querySelector("iframe");
+    if (iframe) iframe.src = property.tour;
+    const title = modal.querySelector("h3");
+    if (title) title.textContent = `3D Tour - ${property.title}`;
+    modal.classList.add("open");
+  }
+}
+
+function openViewingRequestModal(propertyId) {
+  const property = properties.find(p => p.id === propertyId);
+  if (!property) return;
+  
+  const modal = document.getElementById("viewingModal");
+  if (!modal) {
+    const newModal = document.createElement("div");
+    newModal.id = "viewingModal";
+    newModal.className = "modal";
+    newModal.innerHTML = `
+      <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h3>Request a Viewing</h3>
+          <button class="modal-close" onclick="document.getElementById('viewingModal').classList.remove('open')" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <form id="viewingRequestForm" onsubmit="handleViewingRequest(event, '${propertyId}')">
+          <div style="margin-bottom: 16px;">
+            <label>Your Name</label>
+            <input type="text" name="name" required>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label>Phone Number</label>
+            <input type="tel" name="phone" required>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label>Preferred Date & Time</label>
+            <input type="datetime-local" name="datetime" required>
+          </div>
+          <div style="margin-bottom: 24px;">
+            <label>Message (Optional)</label>
+            <textarea name="message" rows="3"></textarea>
+          </div>
+          <button type="submit" class="button button-primary">Submit Request</button>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(newModal);
+    newModal.addEventListener("click", (e) => {
+      if (e.target === newModal) {
+        newModal.classList.remove("open");
+      }
+    });
+  }
+  
+  const modal = document.getElementById("viewingModal");
+  const form = modal.querySelector("form");
+  if (form) {
+    form.onsubmit = (e) => handleViewingRequest(e, propertyId);
+  }
+  modal.classList.add("open");
+}
+
+function handleViewingRequest(event, propertyId) {
+  event.preventDefault();
+  const form = event.target;
+  const formData = new FormData(form);
+  
+  const request = {
+    propertyId,
+    name: formData.get("name"),
+    phone: formData.get("phone"),
+    datetime: formData.get("datetime"),
+    message: formData.get("message")
+  };
+  
+  console.log("Viewing request:", request);
+  alert("Viewing request submitted! The landlord will contact you soon.");
+  form.reset();
+  document.getElementById("viewingModal").classList.remove("open");
+}
+
+// ============================================
+// RENT CALCULATOR
+// ============================================
+
+function calculateRent(income, household, neighborhood) {
+  const monthlyIncome = parseFloat(income) || 0;
+  const householdSize = parseInt(household) || 1;
+  
+  const affordabilityRatio = 0.3; // 30% of income
+  const suggestedRent = monthlyIncome * affordabilityRatio;
+  
+  const neighborhoodMultipliers = {
+    "East Legon": 1.2,
+    "Osu": 1.1,
+    "Cantonments": 1.3,
+    "Airport Residential": 1.15,
+    "Labone": 1.0,
+    "Spintex": 0.95,
+    "Dzorwulu": 1.05,
+    "Tema": 0.9
+  };
+  
+  const multiplier = neighborhoodMultipliers[neighborhood] || 1.0;
+  const adjustedRent = suggestedRent * multiplier;
+  
+  const paymentPlans = [
+    { name: "Monthly", amount: adjustedRent, total: adjustedRent * 12 },
+    { name: "Quarterly", amount: adjustedRent * 3, total: adjustedRent * 12, savings: adjustedRent * 0.05 },
+    { name: "6-Month Advance", amount: adjustedRent * 6, total: adjustedRent * 12, savings: adjustedRent * 0.1 }
+  ];
+  
+  const matchingProperties = properties.filter(p => {
+    const priceDiff = Math.abs(p.price - adjustedRent) / adjustedRent;
+    return priceDiff <= 0.3; // Within 30% of suggested rent
+  }).slice(0, 3);
+  
+  return {
+    suggestedRent: adjustedRent,
+    paymentPlans,
+    matchingProperties,
+    householdSize
+  };
+}
+
+function renderCalculatorSummary(element, data, options = {}) {
+  if (!element) return;
+  
+  const { placeholderMessage = "" } = options;
+  
+  if (!data || !data.suggestedRent) {
+    element.innerHTML = `<p style="color: var(--color-muted); text-align: center;">${placeholderMessage}</p>`;
+    return;
+  }
+  
+  element.innerHTML = `
+    <div style="background: var(--color-surface); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+      <h3 style="margin: 0 0 16px 0; color: var(--color-primary);">Your Suggested Rent</h3>
+      <p style="font-size: 2rem; font-weight: 700; color: var(--color-secondary); margin: 0 0 24px 0;">${formatCurrency(data.suggestedRent)}/month</p>
+      <div style="display: grid; gap: 12px;">
+        ${data.paymentPlans.map(plan => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 8px;">
+            <div>
+              <strong>${plan.name}</strong>
+              ${plan.savings ? `<small style="color: var(--color-primary); display: block;">Save ${formatCurrency(plan.savings)}</small>` : ""}
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 600;">${formatCurrency(plan.amount)}</div>
+              <small style="color: var(--color-muted);">${plan.name === "Monthly" ? "per month" : "per payment"}</small>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+    ${data.matchingProperties && data.matchingProperties.length > 0 ? `
+      <div>
+        <h3 style="margin: 0 0 16px 0;">Matching Properties</h3>
+        <div style="display: grid; gap: 16px;">
+          ${data.matchingProperties.map(prop => `
+            <div style="display: flex; gap: 16px; padding: 16px; background: var(--color-surface); border-radius: 8px; cursor: pointer;" onclick="openPropertyModal(${JSON.stringify(prop).replace(/"/g, '&quot;')})">
+              <img src="${prop.image}" alt="${prop.title}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px;">
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 8px 0;">${prop.title}</h4>
+                <p style="margin: 0 0 8px 0; color: var(--color-muted);">${prop.location}</p>
+                <p style="margin: 0; font-weight: 600; color: var(--color-primary);">${formatCurrency(prop.price)}/month</p>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    ` : ""}
+  `;
+}
+
+function setupCalculatorForm(form, resultElement, options = {}) {
+  if (!form || !resultElement) return;
+  
+  const { defaults = {}, placeholderMessage = "", syncOnInit = true, onResult = null } = options;
+  
+  if (syncOnInit && defaults.income) {
+    if (form.elements["income"]) form.elements["income"].value = defaults.income;
+    if (form.elements["household"]) form.elements["household"].value = defaults.household || 1;
+    if (form.elements["neighborhood"]) form.elements["neighborhood"].value = defaults.neighborhood || "";
+  }
+  
+  const calculate = () => {
+    const income = form.elements["income"]?.value || defaults.income || "";
+    const household = form.elements["household"]?.value || defaults.household || 1;
+    const neighborhood = form.elements["neighborhood"]?.value || defaults.neighborhood || "";
+    
+    if (!income) {
+      renderCalculatorSummary(resultElement, null, { placeholderMessage });
       return;
     }
     
-    // Render properties on listings page
-    console.log("🔄 Rendering properties...");
-    renderWithActiveFilters();
-    renderSavedProperties();
-    console.log("✅ Properties rendered successfully");
-  } catch (error) {
-    console.error("❌ Error initializing:", error);
-    console.error("Error details:", error.stack);
+    const result = calculateRent(income, household, neighborhood);
+    renderCalculatorSummary(resultElement, result, { placeholderMessage });
     
-    // Even on error, try to render embedded data if available
-    if (properties && properties.length > 0) {
-      console.log("⚠️ Error occurred but using available properties");
-      renderWithActiveFilters();
-      renderSavedProperties();
-    } else {
-      if (listingGridEl) {
-        listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
-      }
+    if (onResult) {
+      onResult({ income, household, neighborhood, ...result });
     }
+  };
+  
+  form.addEventListener("input", calculate);
+  form.addEventListener("change", calculate);
+  
+  if (syncOnInit) {
+    calculate();
+  }
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+async function init() {
+  // Load saved favorites
+  savedPropertyIds = loadSavedProperties();
+  
+  // Try to load from JSON (will update properties if successful)
+  await loadProperties();
+  
+  // Render properties if on listings page
+  const listingGridEl = document.getElementById("listingGrid");
+  if (listingGridEl) {
+    renderWithActiveFilters();
   }
   
+  // Render saved properties if on saved page
+  renderSavedProperties();
+  
+  // Setup modals
   setupModals();
-  setupEventListeners();
   
-  const yearSpanEl = document.getElementById("year");
-  if (yearSpanEl) {
-    yearSpanEl.textContent = new Date().getFullYear();
+  // Setup event listeners
+  if (propertyForm) {
+    propertyForm.addEventListener("submit", handlePropertySubmit);
   }
-
-  const calculatorPlaceholder =
-    "Enter your income to discover a realistic monthly rent and matched homes.";
-
+  if (applyFiltersButton) {
+    applyFiltersButton.addEventListener("click", applyFilters);
+  }
+  if (resetFiltersButton) {
+    resetFiltersButton.addEventListener("click", resetFilters);
+  }
+  
+  // Update year
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+  }
+  
+  // Setup calculators
+  const calculatorPlaceholder = "Enter your income to discover a realistic monthly rent and matched homes.";
+  
   if (calculatorForm && calculatorResult) {
     setupCalculatorForm(calculatorForm, calculatorResult, {
       placeholderMessage: calculatorPlaceholder,
     });
   }
-
+  
   if (heroCalculatorForm && heroCalculatorResult) {
     setupCalculatorForm(heroCalculatorForm, heroCalculatorResult, {
       defaults: { income: 7500, household: 3, neighborhood: "East Legon" },
@@ -1633,46 +1028,9 @@ async function init() {
   }
 }
 
-// Event listeners - set up after DOM is ready
-function setupEventListeners() {
-  const propertyFormEl = document.getElementById("propertyForm");
-  const applyFiltersBtn = document.getElementById("applyFilters");
-  const resetFiltersBtn = document.getElementById("resetFilters");
-  
-  propertyFormEl?.addEventListener("submit", handlePropertySubmit);
-  applyFiltersBtn?.addEventListener("click", applyFilters);
-  resetFiltersBtn?.addEventListener("click", resetFilters);
-}
-
-const viewingRequestForm = document.getElementById("viewingRequestForm");
-viewingRequestForm?.addEventListener("submit", handleViewingRequestSubmit);
-
-// Newsletter form handler
-document.querySelectorAll(".newsletter-form").forEach(form => {
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = form.querySelector("input[type='email']").value;
-    if (email) {
-      alert("Thank you for subscribing! We'll keep you updated on new listings and features.");
-      form.reset();
-    }
-  });
-});
-
-// Initialize immediately when DOM is ready
-// Force init to run after a short delay to ensure everything is ready
-(function() {
-  function runInit() {
-    console.log("🔄 Attempting to run init()...");
-    console.log("🔍 Properties before init:", typeof properties !== 'undefined' ? properties.length : 'undefined');
-    init();
-  }
-  
-  if (document.readyState === 'loading') {
-    document.addEventListener("DOMContentLoaded", runInit);
-  } else {
-    // DOM is already ready, run immediately
-    setTimeout(runInit, 100);
-  }
-})();
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }
