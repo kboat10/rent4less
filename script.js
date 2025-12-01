@@ -295,36 +295,35 @@ const EMBEDDED_LISTINGS_DATA = {
 
 // Load properties from JSON file (with embedded fallback)
 async function loadPropertiesFromJSON() {
-  // First try to use embedded data (always available)
+  // First try to fetch from JSON file (primary source)
+  try {
+    const response = await fetch(LISTINGS_DATA_URL);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.listings && Array.isArray(data.listings) && data.listings.length > 0) {
+        console.log(`Loaded ${data.listings.length} listings from JSON file`);
+        return data.listings.map(listing => ({
+          ...listing,
+          id: listing.id || crypto.randomUUID()
+        }));
+      }
+    }
+  } catch (error) {
+    console.log("JSON file not available, using embedded data:", error.message);
+  }
+  
+  // Fallback to embedded data if JSON file is not available
   if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings) {
     const listings = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
       ...listing,
       id: listing.id || crypto.randomUUID()
     }));
-    console.log(`Loaded ${listings.length} listings from embedded data`);
-    
-    // Also try to fetch from JSON file to update if available
-    try {
-      const response = await fetch(LISTINGS_DATA_URL);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.listings && Array.isArray(data.listings) && data.listings.length > 0) {
-          console.log(`Updated with ${data.listings.length} listings from JSON file`);
-          return data.listings.map(listing => ({
-            ...listing,
-            id: listing.id || crypto.randomUUID()
-          }));
-        }
-      }
-    } catch (error) {
-      console.log("JSON file not available, using embedded data:", error.message);
-    }
-    
+    console.log(`Loaded ${listings.length} listings from embedded data (fallback)`);
     return listings;
   }
   
-  // Fallback to default properties if embedded data is missing
-  console.warn("Embedded data missing, using default properties");
+  // Final fallback to default properties
+  console.warn("No data sources available, using default properties");
   return getDefaultProperties();
 }
 
@@ -782,17 +781,22 @@ function createPropertyCard(property, options = {}) {
   return card;
 }
 
-function renderProperties(list = properties, target = listingGrid, options = {}) {
+function renderProperties(list = properties, target = null, options = {}) {
+  // If no target provided, try to find listingGrid
+  if (!target) {
+    target = document.getElementById("listingGrid");
+  }
   if (!target) return;
+  
   target.innerHTML = "";
   
   // Use the provided list or fallback to properties array
-  const propertiesToRender = list.length > 0 ? list : properties;
+  const propertiesToRender = list && list.length > 0 ? list : (properties && properties.length > 0 ? properties : []);
   
   if (!propertiesToRender.length) {
     const emptyState = document.createElement("div");
     emptyState.className = "empty-state";
-    const message = (properties && properties.length === 0) 
+    const message = (!properties || properties.length === 0) 
       ? "Loading properties..." 
       : "No properties found for the selected filters. Try adjusting your budget or payment plan.";
     emptyState.innerHTML = `
@@ -809,16 +813,18 @@ function renderProperties(list = properties, target = listingGrid, options = {})
 }
 
 function renderSavedProperties() {
-  if (!savedGrid) return;
+  const savedGridEl = document.getElementById("savedGrid");
+  if (!savedGridEl) return;
+  
   const savedList = savedPropertyIds
     .map((id) => properties.find((property) => property.id === id))
     .filter(Boolean);
   if (!savedList.length) {
-    savedGrid.innerHTML =
+    savedGridEl.innerHTML =
       "<p class=\"empty-state\">You have no saved homes yet. Tap the ☆ Save button on any property to create your shortlist.</p>";
     return;
   }
-  renderProperties(savedList, savedGrid, { showRemove: true });
+  renderProperties(savedList, savedGridEl, { showRemove: true });
 }
 
 function resetForm(form) {
@@ -866,23 +872,24 @@ function handlePropertySubmit(event) {
 }
 
 function getFilteredProperties() {
-  if (!listingGrid) return [];
-  
   // Ensure properties array is available
   if (!properties || properties.length === 0) {
     console.warn("Properties array is empty. Waiting for data to load...");
     return [];
   }
   
-  const budgetValue = Number(budgetFilter?.value);
-  const flexibilityValue = flexibilityFilter?.value || "Any";
+  const budgetFilterEl = document.getElementById("budgetFilter");
+  const flexibilityFilterEl = document.getElementById("flexibilityFilter");
   const locationFilter = document.getElementById("locationFilter");
   const roomTypeFilter = document.getElementById("roomTypeFilter");
+  
+  const budgetValue = budgetFilterEl ? Number(budgetFilterEl.value) : 0;
+  const flexibilityValue = flexibilityFilterEl?.value || "Any";
   const locationValue = locationFilter?.value || "Any";
   const roomTypeValue = roomTypeFilter?.value || "Any";
 
   return properties.filter((property) => {
-    const matchesBudget = budgetValue ? property.price <= budgetValue : true;
+    const matchesBudget = !budgetValue || budgetValue === 0 || property.price <= budgetValue;
     const matchesFlexibility =
       flexibilityValue === "Any" ||
       property.paymentFlexibility === flexibilityValue;
@@ -900,9 +907,11 @@ function getFilteredProperties() {
 }
 
 function renderWithActiveFilters() {
-  if (!listingGrid) return;
+  const listingGridEl = document.getElementById("listingGrid");
+  if (!listingGridEl) return;
+  
   const filtered = getFilteredProperties();
-  renderProperties(filtered);
+  renderProperties(filtered, listingGridEl);
   
   // Update count display
   const countElement = document.getElementById("listingsCountNumber");
@@ -912,16 +921,17 @@ function renderWithActiveFilters() {
 }
 
 function applyFilters() {
-  if (!listingGrid) return;
   renderWithActiveFilters();
 }
 
 function resetFilters() {
-  if (!listingGrid) return;
-  if (budgetFilter) budgetFilter.value = "";
-  if (flexibilityFilter) flexibilityFilter.value = "Any";
+  const budgetFilterEl = document.getElementById("budgetFilter");
+  const flexibilityFilterEl = document.getElementById("flexibilityFilter");
   const locationFilter = document.getElementById("locationFilter");
   const roomTypeFilter = document.getElementById("roomTypeFilter");
+  
+  if (budgetFilterEl) budgetFilterEl.value = "";
+  if (flexibilityFilterEl) flexibilityFilterEl.value = "Any";
   if (locationFilter) locationFilter.value = "Any";
   if (roomTypeFilter) roomTypeFilter.value = "Any";
   renderWithActiveFilters();
@@ -1405,8 +1415,9 @@ function toggleFavorite(propertyId, options = {}) {
 
 async function init() {
   // Show loading state
-  if (listingGrid) {
-    listingGrid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
+  const listingGridEl = document.getElementById("listingGrid");
+  if (listingGridEl) {
+    listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-muted);"><p>Loading properties...</p></div>';
   }
   
   try {
@@ -1414,29 +1425,33 @@ async function init() {
     properties = await loadProperties();
     
     // Log for debugging
-    console.log(`Loaded ${properties.length} properties from JSON`);
+    console.log(`Loaded ${properties.length} properties`);
     console.log(`Properties with 3D tours: ${properties.filter(p => p.tour).length}`);
     
     if (properties.length === 0) {
       console.error("No properties loaded! Check JSON file path and content.");
-      if (listingGrid) {
-        listingGrid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p></div>';
+      if (listingGridEl) {
+        listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p></div>';
       }
       return;
     }
     
+    // Render properties on listings page
     renderWithActiveFilters();
     renderSavedProperties();
   } catch (error) {
     console.error("Error initializing:", error);
-    if (listingGrid) {
-      listingGrid.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
+    if (listingGridEl) {
+      listingGridEl.innerHTML = '<div style="text-align: center; padding: 48px; color: var(--color-secondary);"><p>Error loading properties. Please refresh the page.</p><p style="font-size: 0.85rem; margin-top: 8px;">' + error.message + '</p></div>';
     }
   }
   
   setupModals();
-  if (yearSpan) {
-    yearSpan.textContent = new Date().getFullYear();
+  setupEventListeners();
+  
+  const yearSpanEl = document.getElementById("year");
+  if (yearSpanEl) {
+    yearSpanEl.textContent = new Date().getFullYear();
   }
 
   const calculatorPlaceholder =
@@ -1469,10 +1484,16 @@ async function init() {
   });
 }
 
-// Event listeners
-propertyForm?.addEventListener("submit", handlePropertySubmit);
-applyFiltersButton?.addEventListener("click", applyFilters);
-resetFiltersButton?.addEventListener("click", resetFilters);
+// Event listeners - set up after DOM is ready
+function setupEventListeners() {
+  const propertyFormEl = document.getElementById("propertyForm");
+  const applyFiltersBtn = document.getElementById("applyFilters");
+  const resetFiltersBtn = document.getElementById("resetFilters");
+  
+  propertyFormEl?.addEventListener("submit", handlePropertySubmit);
+  applyFiltersBtn?.addEventListener("click", applyFilters);
+  resetFiltersBtn?.addEventListener("click", resetFilters);
+}
 
 const viewingRequestForm = document.getElementById("viewingRequestForm");
 viewingRequestForm?.addEventListener("submit", handleViewingRequestSubmit);
