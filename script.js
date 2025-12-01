@@ -590,6 +590,12 @@ function renderWithActiveFilters() {
   if (!listingGrid) return;
   const filtered = getFilteredProperties();
   renderProperties(filtered);
+  
+  // Update count display
+  const countElement = document.getElementById("listingsCountNumber");
+  if (countElement) {
+    countElement.textContent = filtered.length;
+  }
 }
 
 function applyFilters() {
@@ -892,29 +898,40 @@ function openPropertyModal(property) {
 }
 
 function open3DTourModal(property) {
+  if (!property.tour) {
+    alert("3D tour not available for this property. Please contact us to request a tour.");
+    return;
+  }
+  
   const modal = document.createElement("div");
   modal.className = "modal open";
   modal.style.display = "flex";
+  modal.style.zIndex = "2000";
   modal.innerHTML = `
-    <div class="modal-content" style="max-width: 1200px; padding: 0;">
-      <button class="modal-close" data-close style="position: absolute; top: 20px; right: 20px; z-index: 10;">&times;</button>
-      <div style="padding: 32px 32px 24px;">
-        <h3 style="margin: 0 0 8px;">${property.title} - 3D Virtual Tour</h3>
+    <div class="modal-content" style="max-width: 1200px; padding: 0; position: relative;">
+      <button class="modal-close" data-close style="position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">&times;</button>
+      <div style="padding: 32px 32px 24px; background: var(--color-surface);">
+        <h3 style="margin: 0 0 8px; color: var(--color-ink);">${property.title} - 3D Virtual Tour</h3>
         <p style="margin: 0; color: var(--color-muted);">${property.location}</p>
+        ${property.price ? `<p style="margin: 8px 0 0; color: var(--color-primary); font-weight: 600;">${formatCurrency(property.price)}/month</p>` : ""}
       </div>
-      <div class="tour-embed" style="width: 100%; height: 600px; border-radius: 0;">
+      <div class="tour-embed" style="width: 100%; height: 600px; border-radius: 0; background: #000; position: relative;">
         <iframe 
           src="${property.tour}" 
           title="3D tour for ${property.title}" 
           allow="xr-spatial-tracking; gyroscope; accelerometer; fullscreen"
           style="width: 100%; height: 100%; border: 0;"
           allowfullscreen
+          loading="lazy"
         ></iframe>
       </div>
-      <div style="padding: 24px 32px 32px;">
-        <p style="margin: 0; color: var(--color-muted); font-size: 0.9rem;">
-          Use your mouse or touch to navigate the 3D tour. Click and drag to look around, scroll to zoom.
+      <div style="padding: 24px 32px 32px; background: var(--color-surface);">
+        <p style="margin: 0 0 12px; color: var(--color-muted); font-size: 0.9rem;">
+          <strong>Navigation:</strong> Use your mouse or touch to navigate the 3D tour. Click and drag to look around, scroll to zoom in/out.
         </p>
+        <button class="button button-primary" data-request-viewing="${property.id}" style="margin-top: 8px;">
+          Request Viewing for This Property
+        </button>
       </div>
     </div>
   `;
@@ -931,6 +948,15 @@ function open3DTourModal(property) {
       modal.remove();
     }
   });
+  
+  // Add viewing request button handler
+  const requestBtn = modal.querySelector("[data-request-viewing]");
+  if (requestBtn) {
+    requestBtn.addEventListener("click", () => {
+      modal.remove();
+      openViewingRequestModal(property.id);
+    });
+  }
 }
 
 function openViewingRequestModal(propertyId) {
@@ -1067,6 +1093,10 @@ function toggleFavorite(propertyId, options = {}) {
 async function init() {
   // Load properties from JSON file
   properties = await loadProperties();
+  
+  // Log for debugging
+  console.log(`Loaded ${properties.length} properties from JSON`);
+  console.log(`Properties with 3D tours: ${properties.filter(p => p.tour).length}`);
   
   renderWithActiveFilters();
   renderSavedProperties();
