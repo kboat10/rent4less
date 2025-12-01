@@ -305,6 +305,22 @@ const EMBEDDED_LISTINGS_DATA = {
   ]
 };
 
+// IMMEDIATE: Pre-load embedded data RIGHT AFTER it's defined
+console.log("🔄 Pre-loading properties immediately after EMBEDDED_LISTINGS_DATA definition...");
+console.log("🔍 EMBEDDED_LISTINGS_DATA exists:", typeof EMBEDDED_LISTINGS_DATA !== 'undefined');
+if (typeof EMBEDDED_LISTINGS_DATA !== 'undefined' && EMBEDDED_LISTINGS_DATA.listings) {
+  console.log("🔍 EMBEDDED_LISTINGS_DATA.listings length:", EMBEDDED_LISTINGS_DATA.listings.length);
+  properties = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
+    ...listing,
+    id: listing.id || crypto.randomUUID()
+  }));
+  window.properties = properties; // Make globally accessible
+  console.log(`✅ IMMEDIATELY loaded ${properties.length} properties from embedded data`);
+  console.log(`✅ Properties array exists:`, typeof properties !== 'undefined', 'Length:', properties.length);
+} else {
+  console.error("❌ CRITICAL: EMBEDDED_LISTINGS_DATA not available!");
+}
+
 // Load properties from JSON file (with embedded fallback)
 async function loadPropertiesFromJSON() {
   // First try to fetch from JSON file (primary source)
@@ -619,34 +635,18 @@ async function loadProperties() {
 var properties = [];
 let savedPropertyIds = loadSavedProperties();
 
-// IMMEDIATE FALLBACK: Pre-load embedded data to ensure properties are always available
-console.log("🔄 Running preloadProperties function...");
-console.log("🔍 EMBEDDED_LISTINGS_DATA exists:", typeof EMBEDDED_LISTINGS_DATA !== 'undefined');
-if (typeof EMBEDDED_LISTINGS_DATA !== 'undefined') {
-  console.log("🔍 EMBEDDED_LISTINGS_DATA.listings exists:", !!EMBEDDED_LISTINGS_DATA.listings);
-  console.log("🔍 Is array:", Array.isArray(EMBEDDED_LISTINGS_DATA.listings));
-}
-
-(function preloadProperties() {
-  console.log("🔄 Inside preloadProperties function");
+// Properties should already be loaded above, but this is a backup check
+if (!properties || properties.length === 0) {
+  console.warn("⚠️ Properties not loaded yet, attempting backup load...");
   if (EMBEDDED_LISTINGS_DATA && EMBEDDED_LISTINGS_DATA.listings && Array.isArray(EMBEDDED_LISTINGS_DATA.listings)) {
     properties = EMBEDDED_LISTINGS_DATA.listings.map(listing => ({
       ...listing,
       id: listing.id || crypto.randomUUID()
     }));
-    console.log(`✅ Pre-loaded ${properties.length} properties from embedded data (immediate fallback)`);
-    console.log(`✅ Properties array now exists:`, typeof properties !== 'undefined', 'Length:', properties.length);
-    // Make it globally accessible
     window.properties = properties;
-    console.log("✅ Made properties globally accessible via window.properties");
-  } else {
-    console.error("❌ EMBEDDED_LISTINGS_DATA not found or invalid!");
-    console.error("EMBEDDED_LISTINGS_DATA:", typeof EMBEDDED_LISTINGS_DATA);
-    if (typeof EMBEDDED_LISTINGS_DATA !== 'undefined') {
-      console.error("EMBEDDED_LISTINGS_DATA.listings:", EMBEDDED_LISTINGS_DATA.listings);
-    }
+    console.log(`✅ Backup loaded ${properties.length} properties`);
   }
-})();
+}
 
 function saveProperties() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(properties));
